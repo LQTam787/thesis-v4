@@ -1,0 +1,37 @@
+Classes:
+- User(name, email, password, dob, weight, height, activityLevel, goal, goalType, weeklyGoal, allowedDailyIntake, bmi)
++ activityLevel: Sedentary, Lightly Active, Moderately Active, Very Active
++ goalType: lose, maintain, gain. This is for display, not important
++ weeklyGoal: within 0.1 - 1.0kg/week
+
+- Food(name, image, mealType, calories)
++ mealType: Breakfast, Lunch, Snacks, Dinner, Other
+
+- MealEntry(date, time, food)
+
+- WeightEntry(date, weight)
+
+Functions:
+- Register page:
++ asks for name, email, password, dob, weight, height, activityLevel, goal, goalType, weeklyGoal
+
+- Login page:
++ requests email, password
+
+- Dashboard:
++ display bar of: allowedDailyIntake, consumed calories, remaining calories
++ option to log MealEntry --> create MealEntry with selected food, save MealEntry to database
+
+- Food page:
++ display list of saved Foods
++ option to add custom Food to food database
+
+- History page:
+For each Date (each date on one page):
++ Total calories consumed that day
++ Weight that day (from WeightEntry)
++ MealEntries sorted under mealType (each mealType a section/drop-down list)
+
+- Weight Tracking page:
++ bar graph of weight over time, data from WeightEntries
++ option to log weight --> add WeightEntry

@@ -1,0 +1,21 @@
+Your question really goes to the heart of what AI is. I think of it as a thinking process with a master's degree in everything, but with a limited attention span. To use it well, you want to break down the big projects into chunks that fit within the attention span. People talk about the context window, but I mean something a little different. The context window is what AI can remember and say in the span of a chat. Separately there is only so much it can clearly understand and output in one go.
+
+So for your app, the first step is to make a project "Reservations." In that empty project start chatting with Claude about functionality you want. I often say, "Let's talk conceptually without coding yet." You'll build a list of functions, pick a platform, etc. Tell Claude you are not a coder and would like help building an app but first you want to figure out a plan conceptually.
+
+I hear people suggest prompts like "You are a professional coding expert." I have better luck with an honest, "I am a _____ working on ______, and could use your help. Let's start conceptually by making a plan we will use to guide a project together across multiple chat sessions."
+
+Once you have figured out a plan, write something like, "Please create a markdown file in an Artifact that documents our plan. Please make it highly detailed, perhaps even excessively detailed. This file is for you, not for me. It should contain all the nuanced details you need to orient yourself and code the program we discussed as we implement the plan over a series of chats, and should include a proposed sequence of steps for our chat sessions."
+
+Claude will create a markdown, which you can review to make sure it matches your needs. You can highlight parts of the Artifact and click Improve if needed. That will make a little space for you to explain what you want to update and Claude will adjust the Artifact. When you have it just right look for the little button at the bottom of the Artifact panel to add that file to your project.
+
+So now Claude has knowledge about what you are coding. Start a new chat in the project. You can do that by clicking on the project name at the top of the window or by going back to projects using the slide out left-side menu.
+
+Now you are in a new chat in the project. Say something like, "Let's start by making the ____." Or "How shall we start?" Build a part of the app. Just one part - web form, whatever. When you are done, ask for a markdown of the final working script documenting all the details. And add that to your project.
+
+Now Claude knows the project, and what you have done so far. Start a new chat in the project. Rinse and repeat until done.
+
+You'll learn more coding as you go. When you get stuck, ask for help: How do I let people see my app? How do I get a suitable web host? Take a look at this screenshot of the hosting panel, what do I do to set up the database? And so on. You iterate and learn. Claude will get a lot right, and there will also be errors and debugging. Just expect it. This is a thinking rock with lightning in it helping a biochemical meat sack code. I suggest marveling that it works at all and enjoy the back and forth.
+
+I've made some really advanced stuff this way. It's a little addictive, really. And so gratifying to have your software world start reflecting your needs.
+
+Good luck!!

@@ -1,0 +1,47 @@
+Calory:
+Asks for:
+- Sex
+- Name
+- DOB
+- Weight
+- Height
+- Activity Level: Sedentary, Lightly Active, Moderately Active, Very Active
+- Goal: Lose, Maintain, Gain
+- Target
+- Weekly Target
+--> Gives suggested daily caloric intake
+
+Functions:
+- Bar to measure caloric intake
+
+- Meal Tracking: Whenever
++ Entry(date, plate)
++ mealType: Breakfast, Lunch, Snacks, Dinner, Other
++ User can enter an entry directly, creating a "Manual Entry" plate with entered information. This is specific to entry, does not need to be saved as a new plate.
+
+- Plates: Dishes can be registered to be entered in a meal entry
++ Plate(name, picture, mealType, calories)
+
+- History: Display entries by type
+
+- Weight Tracking: Daily
++ Entry(date, weight)
+
+- Food database
+
+- AI estimation of calories from picture of food
+
+- Advanced: seperate food and plate - plate contain foods, icon for each plate, AI nutrition recomendations, marconutrients for each plate, macro tracking
+
+
+Cronometer:
+Asks for:
+- Sex
+- DOB
+- Height
+- Weight
+- Activity Level: No Activity, Sedentary, Lightly Active, Moderately Active, Very Active, Custom
++ Custom allows entry of a daily value for calories burned
+- Goal(kg): smart! whether it's loss or gain doesn't need to be asked
+- Goal Rate: loss per week
+--> Goal Overview: Energy Target, Daily Energy Deficit, (optional)Goal forcast (date when you'll reach your goal)

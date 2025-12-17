@@ -1,0 +1,15 @@
+Make sure each task completely functions (saves to db and displays on screen) before moving on to the next.
+
+Develop in this order:
+- Build register page allowing user to enter account information (name, email, password) as well as personal information (dob, weight, height, activityLevel, goal, goalType, weeklyGoal). Derive allowedDailyIntake from there. Save user's information to database.
+
+- Food page displaying foods that are present in database (might be empty).
+- 'Add Food' page to add custom food. Save new food to database.
+
+- Function to log MealEntry (accessed from dashboard). Save MealEntry to database with time, date and selected Food.
+- History page to display saved MealEntry information.
+
+Do tomorrow:
+- Weight logging function
+- Weight log page
+- Login, user authentication

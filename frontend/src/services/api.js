@@ -25,7 +25,8 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
+    const isAuthEndpoint = error.config?.url?.startsWith('/auth/');
+    if (error.response?.status === 401 && !isAuthEndpoint) {
       localStorage.removeItem('token');
       localStorage.removeItem('user');
       window.location.href = '/login';
@@ -40,7 +41,8 @@ export const authService = {
 };
 
 export const dashboardService = {
-  getTodaySummary: () => api.get('/dashboard/today'),
+  getTodaySummary: () => api.get('/dashboard'),
+  getDashboardByDate: (date) => api.get(`/dashboard/date/${date}`),
 };
 
 export const foodService = {

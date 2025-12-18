@@ -24,11 +24,17 @@ const activityLevels = [
   { value: 'VERY_ACTIVE', label: 'Very Active (6-7 days/week)' },
 ];
 
-const goalTypes = [
-  { value: 'LOSE', label: 'Lose Weight' },
-  { value: 'MAINTAIN', label: 'Maintain Weight' },
-  { value: 'GAIN', label: 'Gain Weight' },
-];
+// Helper function to derive goalType from weight and goal
+const deriveGoalType = (currentWeight, targetWeight) => {
+  const weight = parseFloat(currentWeight);
+  const goal = parseFloat(targetWeight);
+  
+  if (isNaN(weight) || isNaN(goal)) return 'MAINTAIN';
+  
+  if (goal < weight) return 'LOSE';
+  if (goal > weight) return 'GAIN';
+  return 'MAINTAIN';
+};
 
 const Register = () => {
   const navigate = useNavigate();
@@ -43,7 +49,6 @@ const Register = () => {
     height: '',
     activityLevel: 'MODERATELY_ACTIVE',
     goal: '',
-    goalType: 'MAINTAIN',
     weeklyGoal: '0.5',
   });
   const [error, setError] = useState('');
@@ -72,16 +77,20 @@ const Register = () => {
 
     setLoading(true);
 
+    const weight = parseFloat(formData.weight);
+    const goal = formData.goal ? parseFloat(formData.goal) : weight;
+    const goalType = deriveGoalType(weight, goal);
+
     const userData = {
       name: formData.name,
       email: formData.email,
       password: formData.password,
       dob: formData.dob,
-      weight: parseFloat(formData.weight),
+      weight: weight,
       height: parseFloat(formData.height),
       activityLevel: formData.activityLevel,
-      goal: formData.goal ? parseFloat(formData.goal) : parseFloat(formData.weight),
-      goalType: formData.goalType,
+      goal: goal,
+      goalType: goalType,
       weeklyGoal: parseFloat(formData.weeklyGoal),
     };
 
@@ -229,26 +238,7 @@ const Register = () => {
                   </Select>
                 </FormControl>
               </Grid>
-              <Grid item xs={12} sm={6}>
-                <FormControl fullWidth required>
-                  <InputLabel id="goalType-label">Goal Type</InputLabel>
-                  <Select
-                    labelId="goalType-label"
-                    id="goalType"
-                    name="goalType"
-                    value={formData.goalType}
-                    label="Goal Type"
-                    onChange={handleChange}
-                  >
-                    {goalTypes.map((type) => (
-                      <MenuItem key={type.value} value={type.value}>
-                        {type.label}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-              </Grid>
-              <Grid item xs={12} sm={6}>
+              <Grid item xs={12}>
                 <TextField
                   fullWidth
                   id="goal"
@@ -258,7 +248,7 @@ const Register = () => {
                   inputProps={{ step: '0.1', min: '20', max: '300' }}
                   value={formData.goal}
                   onChange={handleChange}
-                  helperText="Leave empty to use current weight"
+                  helperText="Leave empty to maintain current weight"
                 />
               </Grid>
               <Grid item xs={12}>
@@ -272,7 +262,7 @@ const Register = () => {
                   inputProps={{ step: '0.1', min: '0.1', max: '1.0' }}
                   value={formData.weeklyGoal}
                   onChange={handleChange}
-                  helperText="Rate of weight change: 0.1 - 1.0 kg per week"
+                  helperText="Don't worry about this if you aim to maintain your weight."
                 />
               </Grid>
             </Grid>

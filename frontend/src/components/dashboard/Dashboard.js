@@ -7,28 +7,66 @@ import {
   Grid,
   LinearProgress,
   CircularProgress,
+  Alert,
 } from '@mui/material';
 import { useAuth } from '../../context/AuthContext';
+import { dashboardService } from '../../services/api';
 
 const Dashboard = () => {
   const { user } = useAuth();
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
   const [dashboardData, setDashboardData] = useState({
     allowedDailyIntake: user?.allowedDailyIntake || 2000,
     consumedCalories: 0,
     remainingCalories: user?.allowedDailyIntake || 2000,
     percentageConsumed: 0,
+    mealsByType: {},
+    totalMealsCount: 0,
   });
 
   useEffect(() => {
-    // TODO: Fetch dashboard data from API
-    // For now, using placeholder data
-    setDashboardData({
-      allowedDailyIntake: user?.allowedDailyIntake || 2000,
-      consumedCalories: 0,
-      remainingCalories: user?.allowedDailyIntake || 2000,
-      percentageConsumed: 0,
-    });
+    const fetchDashboardData = async () => {
+      try {
+        setLoading(true);
+        setError('');
+        const response = await dashboardService.getTodaySummary();
+        const data = response.data;
+        
+        const consumed = data.consumedCalories || 0;
+        const allowed = data.allowedDailyIntake || user?.allowedDailyIntake || 2000;
+        
+        setDashboardData({
+          allowedDailyIntake: allowed,
+          consumedCalories: consumed,
+          remainingCalories: data.remainingCalories ?? (allowed - consumed),
+          percentageConsumed: allowed > 0 ? (consumed / allowed) * 100 : 0,
+          mealsByType: data.mealsByType || {},
+          totalMealsCount: data.totalMealsCount || 0,
+          userName: data.userName,
+          goalType: data.goalType,
+          currentWeight: data.currentWeight,
+          goalWeight: data.goalWeight,
+          todayWeight: data.todayWeight,
+        });
+      } catch (err) {
+        console.error('Failed to fetch dashboard data:', err);
+        setError('Failed to load dashboard data. Please try again.');
+        // Fallback to user data from context
+        setDashboardData({
+          allowedDailyIntake: user?.allowedDailyIntake || 2000,
+          consumedCalories: 0,
+          remainingCalories: user?.allowedDailyIntake || 2000,
+          percentageConsumed: 0,
+          mealsByType: {},
+          totalMealsCount: 0,
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDashboardData();
   }, [user]);
 
   if (loading) {
@@ -47,7 +85,15 @@ const Dashboard = () => {
 
   return (
     <Box>
+      {error && (
+        <Alert severity="error" sx={{ mb: 2 }}>
+          {error}
+        </Alert>
+      )}
       <Typography variant="h4" gutterBottom>
+        Welcome, {dashboardData.userName || user?.name || 'User'}!
+      </Typography>
+      <Typography variant="h5" gutterBottom>
         Today's Summary
       </Typography>
       <Typography variant="subtitle1" color="textSecondary" gutterBottom>

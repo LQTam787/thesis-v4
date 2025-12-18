@@ -28,14 +28,24 @@ export const AuthProvider = ({ children }) => {
   const login = async (email, password) => {
     try {
       const response = await authService.login({ email, password });
-      const { token, user: userData } = response.data.data;
+      const data = response.data;
       
-      localStorage.setItem('token', token);
+      // Extract user info from response
+      const userData = {
+        userId: data.userId,
+        name: data.name,
+        email: data.email,
+        bmi: data.bmi,
+        allowedDailyIntake: data.allowedDailyIntake,
+      };
+      
+      localStorage.setItem('token', data.token);
       localStorage.setItem('user', JSON.stringify(userData));
       setUser(userData);
       
       return { success: true };
     } catch (error) {
+      console.log(error);
       return { 
         success: false, 
         message: error.response?.data?.message || 'Login failed' 
@@ -43,17 +53,27 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const register = async (userData) => {
+  const register = async (registrationData) => {
     try {
-      const response = await authService.register(userData);
-      const { token, user: newUser } = response.data.data;
+      const response = await authService.register(registrationData);
+      const data = response.data;
       
-      localStorage.setItem('token', token);
-      localStorage.setItem('user', JSON.stringify(newUser));
-      setUser(newUser);
+      // Extract user info from response
+      const userData = {
+        userId: data.userId,
+        name: data.name,
+        email: data.email,
+        bmi: data.bmi,
+        allowedDailyIntake: data.allowedDailyIntake,
+      };
+      
+      localStorage.setItem('token', data.token);
+      localStorage.setItem('user', JSON.stringify(userData));
+      setUser(userData);
       
       return { success: true };
     } catch (error) {
+      console.log(error);
       return { 
         success: false, 
         message: error.response?.data?.message || 'Registration failed' 

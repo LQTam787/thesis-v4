@@ -65,7 +65,9 @@ export const weightEntryService = {
   logWeight: (weightData) => api.post('/weight-entries', weightData),
   getAllWeightEntries: () => api.get('/weight-entries'),
   getWeightEntriesByRange: (startDate, endDate) => 
-    api.get(`/weight-entries?startDate=${startDate}&endDate=${endDate}`),
+    api.get(`/weight-entries/range?startDate=${startDate}&endDate=${endDate}`),
+  getLatestWeightEntry: () => api.get('/weight-entries/latest'),
+  deleteWeightEntry: (id) => api.delete(`/weight-entries/${id}`),
 };
 
 export default api;

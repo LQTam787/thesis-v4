@@ -6,6 +6,8 @@ import { AuthProvider, useAuth } from './context/AuthContext';
 import Login from './components/auth/Login';
 import Register from './components/auth/Register';
 import Dashboard from './components/dashboard/Dashboard';
+import Foods from './components/foods/Foods';
+import History from './components/history/History';
 import Layout from './components/layout/Layout';
 
 const theme = createTheme({
@@ -69,6 +71,8 @@ function App() {
             }>
               <Route index element={<Navigate to="/dashboard" replace />} />
               <Route path="dashboard" element={<Dashboard />} />
+              <Route path="foods" element={<Foods />} />
+              <Route path="history" element={<History />} />
             </Route>
             <Route path="*" element={<Navigate to="/dashboard" replace />} />
           </Routes>

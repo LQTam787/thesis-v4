@@ -47,8 +47,11 @@ export const dashboardService = {
 
 export const foodService = {
   getAllFoods: () => api.get('/foods'),
-  getFoodsByMealType: (mealType) => api.get(`/foods?mealType=${mealType}`),
+  getFoodsByMealType: (mealType) => api.get(`/foods/meal-type/${mealType}`),
+  getFoodById: (id) => api.get(`/foods/${id}`),
+  getCustomFoods: () => api.get('/foods/custom'),
   addFood: (foodData) => api.post('/foods', foodData),
+  updateFood: (id, foodData) => api.put(`/foods/${id}`, foodData),
   deleteFood: (id) => api.delete(`/foods/${id}`),
 };
 

@@ -24,6 +24,11 @@ const activityLevels = [
   { value: 'VERY_ACTIVE', label: 'Very Active (6-7 days/week)' },
 ];
 
+const sexOptions = [
+  { value: 'MALE', label: 'Male' },
+  { value: 'FEMALE', label: 'Female' },
+];
+
 // Helper function to derive goalType from weight and goal
 const deriveGoalType = (currentWeight, targetWeight) => {
   const weight = parseFloat(currentWeight);
@@ -45,6 +50,7 @@ const Register = () => {
     password: '',
     confirmPassword: '',
     dob: '',
+    sex: 'MALE',
     weight: '',
     height: '',
     activityLevel: 'MODERATELY_ACTIVE',
@@ -86,6 +92,7 @@ const Register = () => {
       email: formData.email,
       password: formData.password,
       dob: formData.dob,
+      sex: formData.sex,
       weight: weight,
       height: parseFloat(formData.height),
       activityLevel: formData.activityLevel,
@@ -180,7 +187,7 @@ const Register = () => {
                   onChange={handleChange}
                 />
               </Grid>
-              <Grid item xs={12}>
+              <Grid item xs={12} sm={6}>
                 <TextField
                   required
                   fullWidth
@@ -192,6 +199,25 @@ const Register = () => {
                   value={formData.dob}
                   onChange={handleChange}
                 />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <FormControl fullWidth required>
+                  <InputLabel id="sex-label">Sex</InputLabel>
+                  <Select
+                    labelId="sex-label"
+                    id="sex"
+                    name="sex"
+                    value={formData.sex}
+                    label="Sex"
+                    onChange={handleChange}
+                  >
+                    {sexOptions.map((option) => (
+                      <MenuItem key={option.value} value={option.value}>
+                        {option.label}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
               </Grid>
               <Grid item xs={12} sm={6}>
                 <TextField

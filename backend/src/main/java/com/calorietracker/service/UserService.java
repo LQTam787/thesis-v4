@@ -42,6 +42,7 @@ public class UserService {
                 request.getWeight(),
                 request.getHeight(),
                 age,
+                request.getSex(),
                 request.getActivityLevel(),
                 request.getWeeklyGoal(),
                 request.getGoalType()
@@ -53,6 +54,7 @@ public class UserService {
                 .email(request.getEmail())
                 .password(passwordEncoder.encode(request.getPassword()))
                 .dob(request.getDob())
+                .sex(request.getSex())
                 .weight(request.getWeight())
                 .height(request.getHeight())
                 .activityLevel(request.getActivityLevel())
@@ -93,6 +95,7 @@ public class UserService {
                 newWeight,
                 user.getHeight(),
                 age,
+                user.getSex(),
                 user.getActivityLevel(),
                 user.getWeeklyGoal(),
                 user.getGoalType()

@@ -322,6 +322,11 @@ const goalTypes = [
   { value: 'GAIN', label: 'Gain Weight' },
 ];
 
+const sexTypes = [
+  { value: 'MALE', label: 'Male' },
+  { value: 'FEMALE', label: 'Female' },
+];
+
 const Register = () => {
   const navigate = useNavigate();
   const { register } = useAuth();
@@ -331,6 +336,7 @@ const Register = () => {
     password: '',
     confirmPassword: '',
     dob: '',
+    sex: 'MALE',
     weight: '',
     height: '',
     activityLevel: 'MODERATELY_ACTIVE',
@@ -369,6 +375,7 @@ const Register = () => {
       email: formData.email,
       password: formData.password,
       dob: formData.dob,
+      sex: formData.sex,
       weight: parseFloat(formData.weight),
       height: parseFloat(formData.height),
       activityLevel: formData.activityLevel,
@@ -433,6 +440,7 @@ export default Register;
 | password | password | Required, min 6 chars |
 | confirmPassword | password | Must match password |
 | dob | date | Required |
+| sex | select | Required (MALE, FEMALE) |
 | weight | number | Required, 20-300 kg |
 | height | number | Required, 100-250 cm |
 | activityLevel | select | Required (enum) |

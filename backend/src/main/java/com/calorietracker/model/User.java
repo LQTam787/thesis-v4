@@ -30,6 +30,10 @@ public class User {
     @Column(nullable = false)
     private LocalDate dob;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private Sex sex;
+
     @Column(nullable = false, precision = 5, scale = 2)
     private BigDecimal weight;
 

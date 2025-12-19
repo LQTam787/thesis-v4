@@ -2,6 +2,7 @@ package com.calorietracker.dto.request;
 
 import com.calorietracker.model.ActivityLevel;
 import com.calorietracker.model.GoalType;
+import com.calorietracker.model.Sex;
 import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -32,6 +33,9 @@ public class UserRegistrationRequest {
     @NotNull(message = "Date of birth is required")
     @Past(message = "Date of birth must be in the past")
     private LocalDate dob;
+
+    @NotNull(message = "Sex is required")
+    private Sex sex;
 
     @NotNull(message = "Weight is required")
     @DecimalMin(value = "20.0", message = "Weight must be at least 20 kg")

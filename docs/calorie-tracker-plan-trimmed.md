@@ -15,9 +15,7 @@
 7. [Authentication & Security](#authentication--security)
 8. [API Specifications](#api-specifications)
 9. [Session-by-Session Implementation Plan](#session-by-session-implementation-plan)
-10. [Testing Strategy](#testing-strategy)
-11. [Common Pitfalls & Solutions](#common-pitfalls--solutions)
-12. [Reference Materials](#reference-materials)
+10. [Reference Materials](#reference-materials)
 
 ---
 
@@ -398,6 +396,10 @@ public class User {
     
     @Column(nullable = false)
     private LocalDate dob;
+    
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private Sex sex;
     
     @Column(nullable = false, precision = 5, scale = 2)
     private BigDecimal weight;
@@ -901,6 +903,7 @@ public class UserService {
             .email(request.getEmail())
             .password(passwordEncoder.encode(request.getPassword()))
             .dob(request.getDob())
+            .sex(request.getSex())
             .weight(request.getWeight())
             .height(request.getHeight())
             .activityLevel(request.getActivityLevel())
@@ -1938,6 +1941,9 @@ public class UserRegistrationRequest {
     @NotNull(message = "Date of birth is required")
     @Past(message = "Date of birth must be in the past")
     private LocalDate dob;
+    
+    @NotNull(message = "Sex is required")
+    private Sex sex;
     
     @NotNull(message = "Weight is required")
     @DecimalMin(value = "30.0", message = "Weight must be at least 30kg")

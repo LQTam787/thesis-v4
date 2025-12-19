@@ -166,6 +166,9 @@ public class UserRegistrationRequest {
     @Past(message = "Date of birth must be in the past")
     private LocalDate dob;
 
+    @NotNull(message = "Sex is required")
+    private Sex sex;
+
     @NotNull(message = "Weight is required")
     @DecimalMin(value = "20.0", message = "Weight must be at least 20 kg")
     @DecimalMax(value = "500.0", message = "Weight must be less than 500 kg")
@@ -201,6 +204,7 @@ public class UserRegistrationRequest {
 | email | String | Required, valid email format |
 | password | String | Required, min 6 characters |
 | dob | LocalDate | Required, must be in the past |
+| sex | Sex | Required (MALE, FEMALE) |
 | weight | BigDecimal | Required, 20-500 kg |
 | height | BigDecimal | Required, 50-300 cm |
 | activityLevel | ActivityLevel | Required (SEDENTARY, LIGHTLY_ACTIVE, MODERATELY_ACTIVE, VERY_ACTIVE) |
@@ -341,6 +345,7 @@ public class UserService {
                 .email(request.getEmail())
                 .password(passwordEncoder.encode(request.getPassword()))
                 .dob(request.getDob())
+                .sex(request.getSex())
                 .weight(request.getWeight())
                 .height(request.getHeight())
                 .activityLevel(request.getActivityLevel())

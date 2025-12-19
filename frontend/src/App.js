@@ -9,6 +9,7 @@ import Dashboard from './components/dashboard/Dashboard';
 import Foods from './components/foods/Foods';
 import History from './components/history/History';
 import WeightTracking from './components/weight/WeightTracking';
+import Profile from './components/profile/Profile';
 import Layout from './components/layout/Layout';
 
 const theme = createTheme({
@@ -75,6 +76,7 @@ function App() {
               <Route path="foods" element={<Foods />} />
               <Route path="history" element={<History />} />
               <Route path="weight" element={<WeightTracking />} />
+              <Route path="profile" element={<Profile />} />
             </Route>
             <Route path="*" element={<Navigate to="/dashboard" replace />} />
           </Routes>

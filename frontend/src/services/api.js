@@ -70,4 +70,8 @@ export const weightEntryService = {
   deleteWeightEntry: (id) => api.delete(`/weight-entries/${id}`),
 };
 
+export const userService = {
+  getProfile: () => api.get('/users/profile'),
+};
+
 export default api;

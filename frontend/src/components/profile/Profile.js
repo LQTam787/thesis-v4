@@ -207,7 +207,7 @@ const Profile = () => {
                 <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
                   <Typography color="textSecondary">Daily Calorie Allowance</Typography>
                   <Typography fontWeight="medium" color="primary">
-                    {profile?.allowedDailyIntake ? `${profile.allowedDailyIntake} cal` : '-'}
+                    {profile?.allowedDailyIntake ? `${profile.allowedDailyIntake} kcal` : '-'}
                   </Typography>
                 </Box>
               </Box>

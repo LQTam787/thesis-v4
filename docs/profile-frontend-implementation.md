@@ -242,7 +242,7 @@ Displays weight-related goals and calorie allowance.
 | Weight Goal | `profile.goal` | Append " kg" |
 | Goal Type | `profile.goalType` | `formatGoalType()` with colored Chip |
 | Weekly Goal | `profile.weeklyGoal` | Append " kg/week" |
-| Daily Calorie Allowance | `profile.allowedDailyIntake` | Append " cal", primary color |
+| Daily Calorie Allowance | `profile.allowedDailyIntake` | Append " kcal", primary color |
 
 **Goal Type Chip Colors:**
 | Goal Type | Chip Color |
@@ -584,7 +584,7 @@ const Profile = () => {
                 <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
                   <Typography color="textSecondary">Daily Calorie Allowance</Typography>
                   <Typography fontWeight="medium" color="primary">
-                    {profile?.allowedDailyIntake ? `${profile.allowedDailyIntake} cal` : '-'}
+                    {profile?.allowedDailyIntake ? `${profile.allowedDailyIntake} kcal` : '-'}
                   </Typography>
                 </Box>
               </Box>

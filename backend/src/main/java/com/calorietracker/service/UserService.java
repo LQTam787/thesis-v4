@@ -1,6 +1,8 @@
 package com.calorietracker.service;
 
+import com.calorietracker.dto.request.UpdateProfileRequest;
 import com.calorietracker.dto.request.UserRegistrationRequest;
+import com.calorietracker.model.GoalType;
 import com.calorietracker.exception.BadRequestException;
 import com.calorietracker.exception.ResourceNotFoundException;
 import com.calorietracker.model.User;
@@ -103,5 +105,54 @@ public class UserService {
         user.setAllowedDailyIntake(allowedDailyIntake);
 
         return userRepository.save(user);
+    }
+
+    @Transactional
+    public User updateProfile(Long userId, UpdateProfileRequest request) {
+        User user = getUserById(userId);
+
+        // Update basic fields
+        user.setName(request.getName());
+        user.setSex(request.getSex());
+        user.setDob(request.getDob());
+        user.setHeight(request.getHeight());
+        user.setWeight(request.getWeight());
+        user.setActivityLevel(request.getActivityLevel());
+        user.setGoal(request.getGoal());
+        user.setWeeklyGoal(request.getWeeklyGoal());
+
+        // Derive goalType from comparing goal with new weight
+        GoalType goalType = deriveGoalType(request.getWeight(), request.getGoal());
+        user.setGoalType(goalType);
+
+        // Recalculate BMI
+        BigDecimal bmi = CalorieCalculator.calculateBMI(request.getWeight(), request.getHeight());
+        user.setBmi(bmi);
+
+        // Recalculate allowed daily intake
+        int age = user.getAge();
+        int allowedDailyIntake = CalorieCalculator.calculateAllowedDailyIntake(
+                request.getWeight(),
+                request.getHeight(),
+                age,
+                request.getSex(),
+                request.getActivityLevel(),
+                request.getWeeklyGoal(),
+                goalType
+        );
+        user.setAllowedDailyIntake(allowedDailyIntake);
+
+        return userRepository.save(user);
+    }
+
+    private GoalType deriveGoalType(BigDecimal currentWeight, BigDecimal goalWeight) {
+        int comparison = goalWeight.compareTo(currentWeight);
+        if (comparison < 0) {
+            return GoalType.LOSE;
+        } else if (comparison > 0) {
+            return GoalType.GAIN;
+        } else {
+            return GoalType.MAINTAIN;
+        }
     }
 }

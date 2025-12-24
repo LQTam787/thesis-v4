@@ -1,13 +1,14 @@
 # Profile Frontend Implementation Documentation
 
 **Created**: December 19, 2025  
+**Updated**: December 24, 2025  
 **Status**: Completed
 
 ---
 
 ## Overview
 
-This document describes the frontend implementation for the User Profile page in the Calorie Tracker application. The Profile page displays user information in three sections: Profile, Weight Goals, and BMI.
+This document describes the frontend implementation for the User Profile page in the Calorie Tracker application. The Profile page displays user information in three sections: Profile, Weight Goals, and BMI. Users can edit their profile details through a modal dialog.
 
 ---
 
@@ -17,15 +18,16 @@ This document describes the frontend implementation for the User Profile page in
 frontend/src/
 ├── components/
 │   └── profile/
-│       └── Profile.js           # Profile page component
+│       ├── Profile.js           # Profile page component
+│       └── EditProfileModal.js  # Modal for editing profile
 ├── services/
-│   └── api.js                   # API service (userService.getProfile)
+│   └── api.js                   # API service (userService.getProfile, updateProfile)
 └── App.js                       # Route configuration (/profile)
 ```
 
 ---
 
-## API Endpoint Used
+## API Endpoints Used
 
 ### GET `/api/users/profile`
 
@@ -59,6 +61,46 @@ const response = await userService.getProfile();
 
 ---
 
+### PUT `/api/users/profile`
+
+Updates the authenticated user's profile data.
+
+**API Service Call:**
+```javascript
+const updateData = {
+  name: "John Doe",
+  sex: "MALE",
+  dob: "1990-05-15",
+  height: 175.00,
+  weight: 75.50,
+  activityLevel: "MODERATELY_ACTIVE",
+  goal: 70.00,
+  weeklyGoal: 0.50
+};
+
+const response = await userService.updateProfile(updateData);
+```
+
+**Request Fields:**
+
+| Field | Type | Required | Validation | Description |
+|-------|------|----------|------------|-------------|
+| `name` | String | Yes | 2-100 characters | User's display name |
+| `sex` | String | Yes | MALE or FEMALE | User's sex |
+| `dob` | String | Yes | YYYY-MM-DD, past date | Date of birth |
+| `height` | Number | Yes | 50-300 | Height in centimeters |
+| `weight` | Number | Yes | 20-500 | Current weight in kilograms |
+| `activityLevel` | String | Yes | Valid enum value | Activity level |
+| `goal` | Number | Yes | 20-500 | Target weight in kilograms |
+| `weeklyGoal` | Number | Yes | 0.1-1.0 | Weekly weight change goal in kg |
+
+**Automatic Calculations (by backend):**
+- `goalType` is derived by comparing `goal` with `weight`
+- `bmi` is recalculated from weight and height
+- `allowedDailyIntake` is recalculated based on all updated parameters
+
+---
+
 ## API Service Definition
 
 **File**: `src/services/api.js`
@@ -66,6 +108,7 @@ const response = await userService.getProfile();
 ```javascript
 export const userService = {
   getProfile: () => api.get('/users/profile'),
+  updateProfile: (profileData) => api.put('/users/profile', profileData),
 };
 ```
 
@@ -78,7 +121,7 @@ export const userService = {
 ### Imports
 
 ```javascript
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   Box,
   Card,
@@ -89,11 +132,14 @@ import {
   Alert,
   Divider,
   Chip,
+  Button,
 } from '@mui/material';
 import PersonIcon from '@mui/icons-material/Person';
 import FitnessCenterIcon from '@mui/icons-material/FitnessCenter';
 import MonitorWeightIcon from '@mui/icons-material/MonitorWeight';
+import EditIcon from '@mui/icons-material/Edit';
 import { userService } from '../../services/api';
+import EditProfileModal from './EditProfileModal';
 ```
 
 ### State Variables
@@ -103,27 +149,189 @@ import { userService } from '../../services/api';
 | `loading` | boolean | `true` | Loading state during API call |
 | `error` | string | `''` | Error message if API call fails |
 | `profile` | object | `null` | Profile data from API |
+| `editModalOpen` | boolean | `false` | Controls edit modal visibility |
 
 ### Data Fetching
 
 ```javascript
-useEffect(() => {
-  const fetchProfile = async () => {
-    try {
-      setLoading(true);
-      setError('');
-      const response = await userService.getProfile();
-      setProfile(response.data);
-    } catch (err) {
-      console.error('Failed to fetch profile:', err);
-      setError('Failed to load profile data. Please try again.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  fetchProfile();
+const fetchProfile = useCallback(async () => {
+  try {
+    setLoading(true);
+    setError('');
+    const response = await userService.getProfile();
+    setProfile(response.data);
+  } catch (err) {
+    console.error('Failed to fetch profile:', err);
+    setError('Failed to load profile data. Please try again.');
+  } finally {
+    setLoading(false);
+  }
 }, []);
+
+useEffect(() => {
+  fetchProfile();
+}, [fetchProfile]);
+
+const handleEditSuccess = (updatedProfile) => {
+  setProfile(updatedProfile);
+};
+```
+
+---
+
+## EditProfileModal Component
+
+**File**: `src/components/profile/EditProfileModal.js`
+
+### Overview
+
+A modal dialog for editing user profile details. Allows users to update: name, sex, date of birth, height, activity level, goal weight, and weekly goal.
+
+### Props
+
+| Prop | Type | Description |
+|------|------|-------------|
+| `open` | boolean | Controls modal visibility |
+| `onClose` | function | Callback when modal is closed |
+| `profile` | object | Current profile data to pre-populate form |
+| `onSuccess` | function | Callback with updated profile data on successful save |
+
+### State Variables
+
+| State Variable | Type | Description |
+|----------------|------|-------------|
+| `formData` | object | Form field values |
+| `error` | string | Error message |
+| `submitting` | boolean | Submission loading state |
+
+### Form Fields
+
+| Field | Input Type | Validation |
+|-------|------------|------------|
+| `name` | TextField | Required, non-empty |
+| `sex` | Select | Required (MALE, FEMALE) |
+| `dob` | date | Required |
+| `height` | number | Required, 50-300 cm |
+| `weight` | number | Required, 20-500 kg |
+| `activityLevel` | Select | Required (enum values) |
+| `goal` | number | Required, 20-500 kg |
+| `weeklyGoal` | number | Required, 0.1-1.0 kg |
+
+### Activity Level Options
+
+```javascript
+const activityLevels = [
+  { value: 'SEDENTARY', label: 'Sedentary (little to no exercise)' },
+  { value: 'LIGHTLY_ACTIVE', label: 'Lightly Active (1-3 days/week)' },
+  { value: 'MODERATELY_ACTIVE', label: 'Moderately Active (3-5 days/week)' },
+  { value: 'VERY_ACTIVE', label: 'Very Active (6-7 days/week)' },
+];
+```
+
+### Sex Options
+
+```javascript
+const sexOptions = [
+  { value: 'MALE', label: 'Male' },
+  { value: 'FEMALE', label: 'Female' },
+];
+```
+
+### Form Initialization
+
+```javascript
+useEffect(() => {
+  if (open && profile) {
+    setFormData({
+      name: profile.name || '',
+      sex: profile.sex || '',
+      dob: profile.dob || '',
+      height: profile.height || '',
+      activityLevel: profile.activityLevel || '',
+      goal: profile.goal || '',
+      weeklyGoal: profile.weeklyGoal || '',
+    });
+    setError('');
+  }
+}, [open, profile]);
+```
+
+### Submit Handler
+
+```javascript
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  setError('');
+
+  // Validation
+  if (!formData.name.trim()) {
+    setError('Name is required');
+    return;
+  }
+
+  // ... additional validation ...
+
+  try {
+    setSubmitting(true);
+    const updateData = {
+      name: formData.name.trim(),
+      sex: formData.sex,
+      dob: formData.dob,
+      height: parseFloat(formData.height),
+      activityLevel: formData.activityLevel,
+      goal: parseFloat(formData.goal),
+      weeklyGoal: parseFloat(formData.weeklyGoal),
+    };
+
+    const response = await userService.updateProfile(updateData);
+    onSuccess?.(response.data);
+    onClose();
+  } catch (err) {
+    setError(err.response?.data?.message || 'Failed to update profile. Please try again.');
+  } finally {
+    setSubmitting(false);
+  }
+};
+```
+
+### Key Features
+
+1. **Pre-populated Form**: Form fields are initialized with current profile data when modal opens
+2. **Client-side Validation**: Validates all fields before submission
+3. **Loading State**: Shows loading indicator during submission
+4. **Error Handling**: Displays error messages from validation or API failures
+5. **Info Alert**: Informs user that goalType, BMI, and calorie allowance are automatically calculated
+
+---
+
+## Profile Page Edit Button
+
+The Profile page includes an "Edit Profile" button in the header:
+
+```jsx
+<Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+  <Typography variant="h4">
+    My Profile
+  </Typography>
+  <Button
+    variant="contained"
+    startIcon={<EditIcon />}
+    onClick={() => setEditModalOpen(true)}
+  >
+    Edit Profile
+  </Button>
+</Box>
+```
+
+### Modal Integration
+
+```jsx
+<EditProfileModal
+  open={editModalOpen}
+  onClose={() => setEditModalOpen(false)}
+  profile={profile}
+  onSuccess={handleEditSuccess}
+/>
 ```
 
 ---

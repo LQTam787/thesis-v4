@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   Box,
   Card,
@@ -9,34 +9,42 @@ import {
   Alert,
   Divider,
   Chip,
+  Button,
 } from '@mui/material';
 import PersonIcon from '@mui/icons-material/Person';
 import FitnessCenterIcon from '@mui/icons-material/FitnessCenter';
 import MonitorWeightIcon from '@mui/icons-material/MonitorWeight';
+import EditIcon from '@mui/icons-material/Edit';
 import { userService } from '../../services/api';
+import EditProfileModal from './EditProfileModal';
 
 const Profile = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [profile, setProfile] = useState(null);
+  const [editModalOpen, setEditModalOpen] = useState(false);
+
+  const fetchProfile = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError('');
+      const response = await userService.getProfile();
+      setProfile(response.data);
+    } catch (err) {
+      console.error('Failed to fetch profile:', err);
+      setError('Failed to load profile data. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
-    const fetchProfile = async () => {
-      try {
-        setLoading(true);
-        setError('');
-        const response = await userService.getProfile();
-        setProfile(response.data);
-      } catch (err) {
-        console.error('Failed to fetch profile:', err);
-        setError('Failed to load profile data. Please try again.');
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchProfile();
-  }, []);
+  }, [fetchProfile]);
+
+  const handleEditSuccess = (updatedProfile) => {
+    setProfile(updatedProfile);
+  };
 
   const formatDate = (dateString) => {
     if (!dateString) return '-';
@@ -102,9 +110,18 @@ const Profile = () => {
 
   return (
     <Box>
-      <Typography variant="h4" gutterBottom>
-        My Profile
-      </Typography>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+        <Typography variant="h4">
+          My Profile
+        </Typography>
+        <Button
+          variant="contained"
+          startIcon={<EditIcon />}
+          onClick={() => setEditModalOpen(true)}
+        >
+          Edit Profile
+        </Button>
+      </Box>
 
       <Grid container spacing={3}>
         {/* Profile Section */}
@@ -263,6 +280,13 @@ const Profile = () => {
           </Card>
         </Grid>
       </Grid>
+
+      <EditProfileModal
+        open={editModalOpen}
+        onClose={() => setEditModalOpen(false)}
+        profile={profile}
+        onSuccess={handleEditSuccess}
+      />
     </Box>
   );
 };

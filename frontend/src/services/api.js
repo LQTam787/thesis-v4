@@ -72,6 +72,7 @@ export const weightEntryService = {
 
 export const userService = {
   getProfile: () => api.get('/users/profile'),
+  updateProfile: (profileData) => api.put('/users/profile', profileData),
 };
 
 export const adviceService = {

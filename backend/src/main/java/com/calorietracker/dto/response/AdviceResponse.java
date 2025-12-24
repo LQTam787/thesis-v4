@@ -9,9 +9,8 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class AdviceChatResponse {
+public class AdviceResponse {
     
+    private String message;
     private String response;
-    private boolean success;
-    private String error;
 }

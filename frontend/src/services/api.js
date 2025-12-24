@@ -75,7 +75,7 @@ export const userService = {
 };
 
 export const adviceService = {
-  chat: (message) => api.post('/advice/chat', { message }),
+  chat: (message, history) => api.post('/advice/chat', { message, history }),
 };
 
 export default api;

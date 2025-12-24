@@ -1,15 +1,14 @@
 import React, { useState, useRef, useEffect } from 'react';
 import {
   Box,
-  Paper,
+  Card,
+  CardContent,
+  Typography,
   TextField,
   IconButton,
-  Typography,
+  Paper,
   CircularProgress,
-  Alert,
   Avatar,
-  List,
-  ListItem,
 } from '@mui/material';
 import SendIcon from '@mui/icons-material/Send';
 import SmartToyIcon from '@mui/icons-material/SmartToy';
@@ -19,13 +18,13 @@ import { adviceService } from '../../services/api';
 const Advice = () => {
   const [messages, setMessages] = useState([
     {
-      role: 'assistant',
-      content: "Hello! I'm your AI diet advisor. I can help you with nutrition advice, meal suggestions, and answer questions about healthy eating habits. How can I assist you today?",
+      id: 1,
+      type: 'ai',
+      content: "Hello! I can help you with nutrition advice, meal planning, calorie information, and healthy eating tips. How can I assist you today?",
     },
   ]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
   const messagesEndRef = useRef(null);
 
   const scrollToBottom = () => {
@@ -36,33 +35,46 @@ const Advice = () => {
     scrollToBottom();
   }, [messages]);
 
+  const buildHistory = (currentMessages) => {
+    return currentMessages
+      .filter((msg) => msg.id !== 1)
+      .map((msg) => ({
+        role: msg.type === 'user' ? 'user' : 'model',
+        content: msg.content,
+      }));
+  };
+
   const handleSend = async () => {
     if (!input.trim() || loading) return;
 
-    const userMessage = input.trim();
-    setInput('');
-    setError('');
+    const userMessage = {
+      id: Date.now(),
+      type: 'user',
+      content: input.trim(),
+    };
 
-    setMessages((prev) => [...prev, { role: 'user', content: userMessage }]);
+    const updatedMessages = [...messages, userMessage];
+    setMessages(updatedMessages);
+    setInput('');
     setLoading(true);
 
     try {
-      const response = await adviceService.chat(userMessage);
-      const data = response.data;
-
-      if (data.success) {
-        setMessages((prev) => [
-          ...prev,
-          { role: 'assistant', content: data.response },
-        ]);
-      } else {
-        setError(data.error || 'Failed to get response from AI advisor');
-      }
-    } catch (err) {
-      setError(
-        err.response?.data?.error ||
-          'Failed to connect to AI advisor. Please try again.'
-      );
+      const history = buildHistory(messages);
+      const response = await adviceService.chat(userMessage.content, history);
+      const aiMessage = {
+        id: Date.now() + 1,
+        type: 'ai',
+        content: response.data.response,
+      };
+      setMessages((prev) => [...prev, aiMessage]);
+    } catch (error) {
+      console.error('Error getting advice:', error);
+      const errorMessage = {
+        id: Date.now() + 1,
+        type: 'ai',
+        content: "I apologize, but I'm having trouble processing your request right now. Please try again later.",
+      };
+      setMessages((prev) => [...prev, errorMessage]);
     } finally {
       setLoading(false);
     }
@@ -75,67 +87,28 @@ const Advice = () => {
     }
   };
 
-  const formatMessage = (content) => {
-    return content.split('\n').map((line, index) => (
-      <React.Fragment key={index}>
-        {line}
-        {index < content.split('\n').length - 1 && <br />}
-      </React.Fragment>
-    ));
-  };
-
   return (
     <Box sx={{ height: 'calc(100vh - 120px)', display: 'flex', flexDirection: 'column' }}>
-      <Typography variant="h5" gutterBottom>
-        AI Diet Advisor
+      <Typography variant="h4" gutterBottom>
+        Advice
       </Typography>
-      <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-        Get personalized nutrition advice and meal suggestions based on your profile
+      <Typography variant="subtitle1" color="textSecondary" gutterBottom>
+        Get personalized nutrition advice and diet tips
       </Typography>
 
-      {error && (
-        <Alert severity="error" sx={{ mb: 2 }} onClose={() => setError('')}>
-          {error}
-        </Alert>
-      )}
-
-      <Paper
-        elevation={2}
-        sx={{
-          flex: 1,
-          display: 'flex',
-          flexDirection: 'column',
-          overflow: 'hidden',
-          bgcolor: 'background.default',
-        }}
-      >
-        <List
-          sx={{
-            flex: 1,
-            overflow: 'auto',
-            p: 2,
-          }}
-        >
-          {messages.map((message, index) => (
-            <ListItem
-              key={index}
+      <Card sx={{ flex: 1, display: 'flex', flexDirection: 'column', mt: 2, overflow: 'hidden' }}>
+        <CardContent sx={{ flex: 1, overflow: 'auto', display: 'flex', flexDirection: 'column', gap: 2, p: 2 }}>
+          {messages.map((message) => (
+            <Box
+              key={message.id}
               sx={{
                 display: 'flex',
-                justifyContent: message.role === 'user' ? 'flex-end' : 'flex-start',
-                alignItems: 'flex-start',
-                mb: 2,
-                p: 0,
+                justifyContent: message.type === 'user' ? 'flex-end' : 'flex-start',
+                gap: 1,
               }}
             >
-              {message.role === 'assistant' && (
-                <Avatar
-                  sx={{
-                    bgcolor: 'primary.main',
-                    mr: 1,
-                    width: 36,
-                    height: 36,
-                  }}
-                >
+              {message.type === 'ai' && (
+                <Avatar sx={{ bgcolor: 'primary.main', width: 36, height: 36 }}>
                   <SmartToyIcon fontSize="small" />
                 </Avatar>
               )}
@@ -144,97 +117,64 @@ const Advice = () => {
                 sx={{
                   p: 2,
                   maxWidth: '70%',
-                  bgcolor: message.role === 'user' ? 'primary.main' : 'white',
-                  color: message.role === 'user' ? 'white' : 'text.primary',
+                  bgcolor: message.type === 'user' ? 'primary.main' : 'grey.100',
+                  color: message.type === 'user' ? 'white' : 'text.primary',
                   borderRadius: 2,
-                  borderTopLeftRadius: message.role === 'assistant' ? 0 : 2,
-                  borderTopRightRadius: message.role === 'user' ? 0 : 2,
+                  borderTopLeftRadius: message.type === 'ai' ? 0 : 2,
+                  borderTopRightRadius: message.type === 'user' ? 0 : 2,
                 }}
               >
-                <Typography variant="body1" sx={{ whiteSpace: 'pre-wrap' }}>
-                  {formatMessage(message.content)}
-                </Typography>
-              </Paper>
-              {message.role === 'user' && (
-                <Avatar
+                <Typography
+                  variant="body1"
                   sx={{
-                    bgcolor: 'secondary.main',
-                    ml: 1,
-                    width: 36,
-                    height: 36,
+                    whiteSpace: 'pre-wrap',
+                    wordBreak: 'break-word',
                   }}
                 >
+                  {message.content}
+                </Typography>
+              </Paper>
+              {message.type === 'user' && (
+                <Avatar sx={{ bgcolor: 'secondary.main', width: 36, height: 36 }}>
                   <PersonIcon fontSize="small" />
                 </Avatar>
               )}
-            </ListItem>
+            </Box>
           ))}
           {loading && (
-            <ListItem
-              sx={{
-                display: 'flex',
-                justifyContent: 'flex-start',
-                alignItems: 'flex-start',
-                mb: 2,
-                p: 0,
-              }}
-            >
-              <Avatar
-                sx={{
-                  bgcolor: 'primary.main',
-                  mr: 1,
-                  width: 36,
-                  height: 36,
-                }}
-              >
+            <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+              <Avatar sx={{ bgcolor: 'primary.main', width: 36, height: 36 }}>
                 <SmartToyIcon fontSize="small" />
               </Avatar>
               <Paper
                 elevation={1}
                 sx={{
                   p: 2,
-                  bgcolor: 'white',
+                  bgcolor: 'grey.100',
                   borderRadius: 2,
                   borderTopLeftRadius: 0,
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 1,
                 }}
               >
                 <CircularProgress size={20} />
-                <Typography variant="body2" color="text.secondary">
-                  Thinking...
-                </Typography>
               </Paper>
-            </ListItem>
+            </Box>
           )}
           <div ref={messagesEndRef} />
-        </List>
+        </CardContent>
 
-        <Box
-          sx={{
-            p: 2,
-            borderTop: 1,
-            borderColor: 'divider',
-            bgcolor: 'white',
-          }}
-        >
+        <Box sx={{ p: 2, borderTop: 1, borderColor: 'divider' }}>
           <Box sx={{ display: 'flex', gap: 1 }}>
             <TextField
               fullWidth
-              multiline
-              maxRows={4}
-              placeholder="Ask me about nutrition, diet tips, or meal suggestions..."
+              variant="outlined"
+              placeholder="Ask me about nutrition, diet tips, meal planning..."
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyPress={handleKeyPress}
               disabled={loading}
+              multiline
+              maxRows={3}
               size="small"
-              sx={{
-                '& .MuiOutlinedInput-root': {
-                  borderRadius: 2,
-                },
-              }}
             />
             <IconButton
               color="primary"
@@ -243,20 +183,18 @@ const Advice = () => {
               sx={{
                 bgcolor: 'primary.main',
                 color: 'white',
-                '&:hover': {
-                  bgcolor: 'primary.dark',
-                },
-                '&:disabled': {
-                  bgcolor: 'action.disabledBackground',
-                  color: 'action.disabled',
-                },
+                '&:hover': { bgcolor: 'primary.dark' },
+                '&:disabled': { bgcolor: 'grey.300' },
               }}
             >
               <SendIcon />
             </IconButton>
           </Box>
+          <Typography variant="caption" color="textSecondary" sx={{ mt: 1, display: 'block' }}>
+            Note: This AI provides general advice. Please consult a healthcare professional for personalized medical advice.
+          </Typography>
         </Box>
-      </Paper>
+      </Card>
     </Box>
   );
 };

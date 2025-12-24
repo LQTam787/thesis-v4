@@ -1,200 +1,208 @@
 # Advice Feature Implementation
 
 ## Overview
-The Advice feature provides users with an AI-powered diet advisor chat interface. Users can ask questions about nutrition, diet tips, meal suggestions, and receive personalized advice based on their profile information.
+The Advice feature allows users to chat with an AI diet advisor powered by Google's Gemini API (gemini-2.5-flash model). The system provides personalized nutrition advice using the user's profile data, meal history (last 7 days), and weight history (last month).
 
-## Technology Stack
-- **AI Model**: DeepSeek-R1 via Ollama
-- **Ollama URL**: `http://localhost:11434`
-- **API Endpoint**: `/api/advice/chat`
+## Architecture
 
-## Prerequisites
-1. **Ollama** must be installed and running locally on port 11434
-2. **DeepSeek-R1** model must be pulled: `ollama pull deepseek-r1`
+### Backend Stack
+- **Framework**: Spring Boot 3.2.1
+- **HTTP Client**: WebClient (Spring WebFlux)
+- **External API**: Google Gemini API (gemini-2.5-flash)
+- **Authentication**: JWT Bearer tokens via Spring Security
 
----
+### Frontend Stack
+- **Framework**: React 18.2.0
+- **UI Library**: Material-UI 5.15.4
+- **HTTP Client**: Axios with interceptors
+- **Routing**: React Router v6
 
-## Backend Implementation
+## Backend Components
+
+### Configuration
+- **File**: `backend/src/main/resources/application.properties`
+- **Properties**:
+  - `gemini.api.key`: API key for Gemini API (set to actual key, default was 'placeholder')
+  - `gemini.api.model`: Model identifier (gemini-2.5-flash)
 
 ### DTOs
 
-#### AdviceChatRequest
-**File**: `dto/request/AdviceChatRequest.java`
-```java
-String message    // @NotBlank
-```
+#### AdviceRequest
+- **File**: `backend/src/main/java/com/calorietracker/dto/request/AdviceRequest.java`
+- **Fields**:
+  - `message` (String, required): User's question or message
+  - `history` (List<ChatMessage>, optional): Conversation history for context
+    - Each ChatMessage contains:
+      - `role` (String): "user" or "model"
+      - `content` (String): Message text
+- **Validation**: Message is required and must not be blank
 
-#### AdviceChatResponse
-**File**: `dto/response/AdviceChatResponse.java`
-```java
-String response   // AI response text
-boolean success   // Whether the request succeeded
-String error      // Error message if failed
-```
+#### AdviceResponse
+- **File**: `backend/src/main/java/com/calorietracker/dto/response/AdviceResponse.java`
+- **Fields**:
+  - `message` (String): Original user message
+  - `response` (String): AI advisor's response
 
----
-
-### Service
+### Service Layer
 
 #### AdviceService
-**File**: `service/AdviceService.java`
+- **File**: `backend/src/main/java/com/calorietracker/service/AdviceService.java`
+- **Dependencies**:
+  - `WebClient`: For HTTP calls to Gemini API
+  - `MealEntryRepository`: To fetch user's meal history
+  - `WeightEntryRepository`: To fetch user's weight history
+- **Key Methods**:
+  - `chat(AdviceRequest request, User user)`: Main entry point for chat requests
+  - `buildSystemPrompt(User user)`: Creates personalized system prompt with user profile
+  - `buildMealHistorySection(Long userId)`: Fetches and formats meal entries from last 7 days
+  - `buildWeightHistorySection(Long userId)`: Fetches and formats weight entries from last month
+  - `buildContentsWithHistory(AdviceRequest request, User user)`: Constructs full Gemini API request with conversation context
+  - `truncateHistoryToTokenLimit(List<ChatMessage> history)`: Limits conversation history to ~2000 tokens
+  - `extractResponseText(Map<String, Object> response)`: Parses Gemini API response
 
-| Method | Description |
-|--------|-------------|
-| `chat(String message, Long userId)` | Sends user message to Ollama and returns AI response |
-| `buildContextualPrompt(User user)` | Builds user profile context for personalized advice |
+**System Prompt Template**:
+The system prompt includes:
+- Role definition: Professional diet advisor and nutritionist
+- User profile data: Name, age, sex, height, weight, BMI, activity level, target weight, pace, daily calorie allowance
+- Meal history: Last 7 days of meals organized by date with calorie totals
+- Weight history: Last month of weight entries with overall trend (gained/lost/maintained)
+- Instructions: Use plain text, no markdown, use user's information when making recommendations
 
-**Configuration**:
-- `OLLAMA_URL`: `http://localhost:11434/api/chat`
-- `MODEL_NAME`: `deepseek-r1`
+**Token Management**:
+- Max history tokens: 2000 (approximately 8000 characters)
+- Estimation: 4 characters per token
+- History truncation: Keeps most recent messages within token limit, removes oldest messages first
 
-**System Prompt**:
-The AI is configured as a friendly diet advisor that:
-- Provides nutrition and diet advice
-- Suggests meal ideas and food alternatives
-- Helps users understand calorie and nutrition needs
-- Offers encouragement for health goals
-- Recommends consulting healthcare professionals for medical issues
+**Date/Time Formatting**:
+- Weight history dates: "MMM d" format with US locale (e.g., "Dec 24")
+- Meal history dates: "EEE, MMM d" format with US locale (e.g., "Tue, Dec 24")
+- Meal times: "hh:mm a" format with US locale (e.g., "08:30 AM")
 
-**User Context**:
-The service automatically includes user profile information:
-- Name, Age, Sex
-- Current Weight, Height, BMI
-- Activity Level
-- Goal Type, Target Weight, Weekly Goal
-- Daily Calorie Allowance
+**API Request Structure**:
+```
+POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={apiKey}
+Content-Type: application/json
 
----
+{
+  "contents": [
+    {
+      "role": "user",
+      "parts": [{"text": "System prompt with user profile and history"}]
+    },
+    {
+      "role": "model",
+      "parts": [{"text": "I understand. I'm ready to help with diet and nutrition advice."}]
+    },
+    // ... previous conversation messages ...
+    {
+      "role": "user",
+      "parts": [{"text": "Current user message"}]
+    }
+  ]
+}
+```
 
 ### Controller
 
 #### AdviceController
-**File**: `controller/AdviceController.java`
+- **File**: `backend/src/main/java/com/calorietracker/controller/AdviceController.java`
+- **Authentication**: Requires JWT Bearer token (Spring Security)
+- **Endpoints**:
+  - `POST /api/advice/chat`: Chat with AI diet advisor
+    - **Authentication**: Required (@AuthenticationPrincipal UserDetails)
+    - **Request Body**: AdviceRequest (message + optional history)
+    - **Response**: AdviceResponse (message + response)
+    - **Error Handling**: Returns 401 if user not authenticated, 400 if validation fails
+- **User Extraction**: Fetches authenticated user from UserRepository using email from UserDetails
 
-| Method | Endpoint | Request | Response |
-|--------|----------|---------|----------|
-| POST | `/api/advice/chat` | AdviceChatRequest | AdviceChatResponse |
+### Repositories
+- `MealEntryRepository.findByUserIdAndEntryDateBetween(userId, startDate, endDate)`: Fetch meals within date range
+- `WeightEntryRepository.findByUserIdAndEntryDateBetweenOrderByEntryDateAsc(userId, startDate, endDate)`: Fetch weight entries within date range
 
----
-
-## Frontend Implementation
+## Frontend Components
 
 ### API Service
-**File**: `services/api.js`
-
-```javascript
-export const adviceService = {
-  chat: (message) => api.post('/advice/chat', { message }),
-};
-```
-
----
+- **File**: `frontend/src/services/api.js`
+- **Method**: `adviceService.chat(message, history)`
+  - Sends POST request to `/api/advice/chat`
+  - Includes JWT token in Authorization header
+  - Parameters:
+    - `message` (String): User's message
+    - `history` (Array): Conversation history with role and content
 
 ### Advice Component
-**File**: `components/advice/Advice.js`
+- **File**: `frontend/src/components/advice/Advice.js`
+- **Features**:
+  - Chat interface with message bubbles
+  - User messages: Right-aligned, blue background, PersonIcon avatar
+  - AI messages: Left-aligned, gray background, SmartToyIcon avatar
+  - Loading state: Shows spinner while waiting for response
+  - Auto-scroll: Scrolls to latest message
+  - Message history: Maintains all messages in state
+- **Key Functions**:
+  - `buildHistory(currentMessages)`: Converts frontend messages to API format (role + content)
+  - `handleSend()`: Sends message with history to backend
+  - `handleKeyPress()`: Allows Enter key to send (Shift+Enter for new line)
+- **Initial Message**: Greeting message with ID 1 (filtered out when building history)
+- **Disclaimer**: Reminds users to consult healthcare professionals
 
-**State**:
-```javascript
-messages: Array<{ role: 'user' | 'assistant', content: string }>
-input: string
-loading: boolean
-error: string
-```
+### Navigation Integration
+- **File**: `frontend/src/components/layout/Layout.js`
+- Menu item: "Advice" with SmartToyIcon
+- Route: `/advice`
+- **File**: `frontend/src/App.js`
+- Route definition: `<Route path="advice" element={<Advice />} />`
 
-**Features**:
-1. **Chat Interface**: Modern chat UI with message bubbles
-2. **Auto-scroll**: Automatically scrolls to latest message
-3. **Loading State**: Shows "Thinking..." indicator while waiting for AI
-4. **Error Handling**: Displays error alerts for failed requests
-5. **Enter to Send**: Supports Enter key to send messages
-6. **Multiline Input**: Supports multiline message input
+## Data Flow
 
-**UI Elements**:
-- Message list with user/assistant avatars
-- Text input field with send button
-- Loading indicator during AI response
-- Error alert banner
+1. **User sends message**:
+   - Frontend builds history from previous messages (excluding initial greeting)
+   - Sends POST request with message and history
 
----
+2. **Backend processes**:
+   - AdviceController extracts authenticated user
+   - AdviceService builds system prompt with:
+     - User profile (from User entity)
+     - Meal history (from MealEntryRepository, last 7 days)
+     - Weight history (from WeightEntryRepository, last month)
+   - Truncates conversation history to 2000 tokens
+   - Constructs Gemini API request with full context
 
-### Routing
+3. **Gemini API**:
+   - Receives request with system prompt and conversation
+   - Generates response based on user's profile and history
+   - Returns response text
 
-**File**: `App.js`
-```javascript
-<Route path="advice" element={<Advice />} />
-```
+4. **Response to frontend**:
+   - AdviceService extracts text from Gemini response
+   - Returns AdviceResponse with original message and AI response
+   - Frontend displays AI message in chat
 
----
-
-### Navigation
-
-**File**: `components/layout/Layout.js`
-
-Added to menuItems:
-```javascript
-{ text: 'Advice', icon: <TipsAndUpdatesIcon />, path: '/advice' }
-```
-
----
-
-## File Structure
-
-### Backend
-```
-backend/src/main/java/com/calorietracker/
-├── controller/
-│   └── AdviceController.java
-├── dto/
-│   ├── request/
-│   │   └── AdviceChatRequest.java
-│   └── response/
-│       └── AdviceChatResponse.java
-└── service/
-    └── AdviceService.java
-```
-
-### Frontend
-```
-frontend/src/
-├── components/
-│   └── advice/
-│       └── Advice.js
-├── services/
-│   └── api.js (updated)
-└── App.js (updated)
-```
-
----
-
-## Usage
-
-1. Start Ollama with DeepSeek-R1 model:
-   ```bash
-   ollama serve
-   ollama pull deepseek-r1
-   ```
-
-2. Start the backend server (port 8080)
-
-3. Start the frontend server (port 3000)
-
-4. Navigate to the "Advice" page from the sidebar
-
-5. Type questions about diet, nutrition, or meal suggestions
-
----
+## Dependencies Added
+- `spring-boot-starter-webflux`: WebClient for HTTP calls to Gemini API
 
 ## Error Handling
 
-| Scenario | User Message |
-|----------|--------------|
-| Ollama not running | "AI service is currently unavailable. Please ensure Ollama is running on localhost:11434" |
-| API request fails | "Failed to connect to AI advisor. Please try again." |
-| Empty response | "Failed to get response from AI service" |
+**Backend**:
+- API call failures: Returns error message "I apologize, but I'm unable to process your request at the moment. Please try again later."
+- Response parsing errors: Logs error, returns "Unable to parse AI response."
+- User not found: Throws RuntimeException (caught by Spring Security)
 
----
+**Frontend**:
+- Network errors: Displays error message in chat
+- Validation errors: Message field is required, send button disabled if empty
 
-## Security
-- Endpoint requires JWT authentication
-- User context is fetched server-side using authenticated user ID
-- No sensitive data is sent to external services (Ollama runs locally)
+## Setup Instructions
+1. Obtain Gemini API key from Google AI Studio (https://makersuite.google.com/app/apikey)
+2. Update `backend/src/main/resources/application.properties`:
+   - Set `gemini.api.key` to your actual API key
+   - Verify `gemini.api.model=gemini-2.5-flash`
+3. Ensure JWT authentication is configured in Spring Security
+4. Frontend automatically includes JWT token in requests via axios interceptor
+
+## Testing Considerations
+- Mock Gemini API responses for unit tests
+- Test token truncation with various conversation lengths
+- Verify date formatting with different locales
+- Test with users having no meal/weight history
+- Verify conversation context is maintained across multiple messages

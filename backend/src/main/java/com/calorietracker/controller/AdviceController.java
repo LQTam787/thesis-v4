@@ -1,7 +1,7 @@
 package com.calorietracker.controller;
 
-import com.calorietracker.dto.request.AdviceChatRequest;
-import com.calorietracker.dto.response.AdviceChatResponse;
+import com.calorietracker.dto.request.AdviceRequest;
+import com.calorietracker.dto.response.AdviceResponse;
 import com.calorietracker.model.User;
 import com.calorietracker.repository.UserRepository;
 import com.calorietracker.service.AdviceService;
@@ -20,18 +20,16 @@ public class AdviceController {
     private final AdviceService adviceService;
     private final UserRepository userRepository;
 
+    /**
+     * Chat with AI diet advisor
+     */
     @PostMapping("/chat")
-    public ResponseEntity<AdviceChatResponse> chat(
-            @Valid @RequestBody AdviceChatRequest request,
+    public ResponseEntity<AdviceResponse> chat(
+            @Valid @RequestBody AdviceRequest request,
             @AuthenticationPrincipal UserDetails userDetails) {
-        Long userId = getUserIdFromUserDetails(userDetails);
-        AdviceChatResponse response = adviceService.chat(request.getMessage(), userId);
-        return ResponseEntity.ok(response);
-    }
-
-    private Long getUserIdFromUserDetails(UserDetails userDetails) {
         User user = userRepository.findByEmail(userDetails.getUsername())
                 .orElseThrow(() -> new RuntimeException("User not found"));
-        return user.getId();
+        AdviceResponse response = adviceService.chat(request, user);
+        return ResponseEntity.ok(response);
     }
 }

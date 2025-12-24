@@ -20,6 +20,7 @@ import DashboardIcon from '@mui/icons-material/Dashboard';
 import RestaurantIcon from '@mui/icons-material/Restaurant';
 import HistoryIcon from '@mui/icons-material/History';
 import MonitorWeightIcon from '@mui/icons-material/MonitorWeight';
+import TipsAndUpdatesIcon from '@mui/icons-material/TipsAndUpdates';
 import PersonIcon from '@mui/icons-material/Person';
 import LogoutIcon from '@mui/icons-material/Logout';
 import { useAuth } from '../../context/AuthContext';
@@ -31,6 +32,7 @@ const menuItems = [
   { text: 'Foods', icon: <RestaurantIcon />, path: '/foods' },
   { text: 'History', icon: <HistoryIcon />, path: '/history' },
   { text: 'Weight Tracking', icon: <MonitorWeightIcon />, path: '/weight' },
+  { text: 'Advice', icon: <TipsAndUpdatesIcon />, path: '/advice' },
   { text: 'Profile', icon: <PersonIcon />, path: '/profile' },
 ];
 

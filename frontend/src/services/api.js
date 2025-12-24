@@ -74,4 +74,8 @@ export const userService = {
   getProfile: () => api.get('/users/profile'),
 };
 
+export const adviceService = {
+  chat: (message) => api.post('/advice/chat', { message }),
+};
+
 export default api;

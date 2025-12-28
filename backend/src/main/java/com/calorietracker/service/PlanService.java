@@ -1,13 +1,13 @@
 package com.calorietracker.service;
 
-import com.calorietracker.dto.request.AdviceRequest;
-import com.calorietracker.dto.response.AdviceResponse;
+import com.calorietracker.dto.response.PlanResponse;
 import com.calorietracker.model.MealEntry;
+import com.calorietracker.model.Plan;
 import com.calorietracker.model.User;
 import com.calorietracker.model.WeightEntry;
 import com.calorietracker.repository.MealEntryRepository;
+import com.calorietracker.repository.PlanRepository;
 import com.calorietracker.repository.WeightEntryRepository;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
@@ -16,33 +16,25 @@ import org.springframework.web.reactive.function.client.WebClient;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
 @Slf4j
-public class AdviceService {
+public class PlanService {
 
     private final WebClient webClient;
+    private final PlanRepository planRepository;
     private final MealEntryRepository mealEntryRepository;
     private final WeightEntryRepository weightEntryRepository;
     private final String apiKey;
     private final String model;
 
     private static final String GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/";
-    private static final int MAX_HISTORY_TOKENS = 2000;
-    private static final double AVG_CHARS_PER_TOKEN = 4.0;
     private static final String SYSTEM_PROMPT_TEMPLATE = """
-            You are a professional diet advisor and nutritionist. Your role is to:
-            - Provide helpful, accurate, and personalized diet advice
-            - Answer questions about nutrition, calories, and healthy eating habits
-            - Suggest meal plans and food alternatives when asked
-            - Help users understand their dietary needs based on their goals
-            - Keep responses concise but informative
-
-            Use user's information when making recomendations.
+            You are a professional nutritionist and meal planner. Your task is to create a personalized meal plan for the user for next week.
+            
             User Profile:
             - Name: %s
             - Age: %d years old
@@ -51,30 +43,47 @@ public class AdviceService {
             - Weight: %.1f kg
             - BMI: %.1f
             - Activity Level: %s
-            - Target Weight: %s
+            - Goal: %s
             - Pace: %.2f kg/week
             - Daily Calorie Allowance: %d cal
             
-            Do not use markdown. Reply in plain text.
+            %s
+            %s
+            
+            Based on this information, create a detailed 7-day meal plan that:
+            1. Stays within the daily calorie allowance
+            2. Includes breakfast, lunch and dinner
+            3. Is balanced with proteins, carbs, and healthy fats
+            4. Considers the user's goal (weight loss/gain/maintenance)
+            5. Is practical and uses common ingredients
+            
+            Format the plan clearly with each day and meal listed.
+            Trim all superfluous text, reply should contain only a bulleted list. Do not use markdown, reply in plain text.
             """;
 
-    public AdviceService(
+    public PlanService(
             WebClient.Builder webClientBuilder,
+            PlanRepository planRepository,
             MealEntryRepository mealEntryRepository,
             WeightEntryRepository weightEntryRepository,
             @Value("${gemini.api.key}") String apiKey,
             @Value("${gemini.api.model}") String model) {
         this.webClient = webClientBuilder.baseUrl(GEMINI_API_URL).build();
+        this.planRepository = planRepository;
         this.mealEntryRepository = mealEntryRepository;
         this.weightEntryRepository = weightEntryRepository;
         this.apiKey = apiKey;
         this.model = model;
     }
 
-    public AdviceResponse chat(AdviceRequest request, User user) {
-        log.debug("Processing advice request: {}", request.getMessage());
+    public PlanResponse generatePlan(User user) {
+        log.debug("Generating meal plan for user: {}", user.getId());
 
-        List<Map<String, Object>> contents = buildContentsWithHistory(request, user);
+        String prompt = buildPrompt(user);
+        
+        List<Map<String, Object>> contents = List.of(
+                Map.of("role", "user", "parts", List.of(Map.of("text", prompt)))
+        );
 
         Map<String, Object> requestBody = Map.of("contents", contents);
 
@@ -90,24 +99,40 @@ public class AdviceService {
                     .bodyToMono(Map.class)
                     .block();
 
-            String aiResponse = extractResponseText(response);
+            String planText = extractResponseText(response);
 
-            return AdviceResponse.builder()
-                    .message(request.getMessage())
-                    .response(aiResponse)
+            Plan plan = planRepository.findByUserId(user.getId())
+                    .orElse(Plan.builder().user(user).build());
+            plan.setText(planText);
+            Plan savedPlan = planRepository.save(plan);
+
+            return PlanResponse.builder()
+                    .text(planText)
+                    .createdAt(savedPlan.getCreatedAt())
                     .build();
 
         } catch (Exception e) {
             log.error("Error calling Gemini API: {}", e.getMessage(), e);
-            return AdviceResponse.builder()
-                    .message(request.getMessage())
-                    .response("I apologize, but I'm unable to process your request at the moment. Please try again later.")
+            return PlanResponse.builder()
+                    .text("I apologize, but I'm unable to generate your meal plan at the moment. Please try again later.")
                     .build();
         }
     }
 
-    private String buildSystemPrompt(User user) {
-        String basePrompt = String.format(SYSTEM_PROMPT_TEMPLATE,
+    public PlanResponse getPlan(User user) {
+        return planRepository.findByUserId(user.getId())
+                .map(plan -> PlanResponse.builder()
+                        .text(plan.getText())
+                        .createdAt(plan.getCreatedAt())
+                        .build())
+                .orElse(PlanResponse.builder().text(null).createdAt(null).build());
+    }
+
+    private String buildPrompt(User user) {
+        String mealHistory = buildMealHistorySection(user.getId());
+        String weightHistory = buildWeightHistorySection(user.getId());
+        
+        return String.format(SYSTEM_PROMPT_TEMPLATE,
                 user.getName(),
                 user.getAge(),
                 user.getSex().name(),
@@ -117,12 +142,10 @@ public class AdviceService {
                 user.getActivityLevel().name().replace("_", " "),
                 user.getGoalType().name().replace("_", " "),
                 user.getWeeklyGoal().doubleValue(),
-                user.getAllowedDailyIntake()
+                user.getAllowedDailyIntake(),
+                mealHistory,
+                weightHistory
         );
-        
-        String mealHistory = buildMealHistorySection(user.getId());
-        String weightHistory = buildWeightHistorySection(user.getId());
-        return basePrompt + mealHistory + weightHistory;
     }
 
     private String buildWeightHistorySection(Long userId) {
@@ -133,12 +156,12 @@ public class AdviceService {
                 userId, startDate, endDate);
         
         if (entries.isEmpty()) {
-            return "\nWeight History (Last Month): No weight entries logged.\n";
+            return "Weight History (Last Month): No weight entries logged.";
         }
         
         DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("MMM d").withLocale(java.util.Locale.US);
         
-        StringBuilder sb = new StringBuilder("\nWeight History (Last Month):\n");
+        StringBuilder sb = new StringBuilder("Weight History (Last Month):\n");
         
         for (WeightEntry entry : entries) {
             sb.append(String.format("  - %s: %.1f kg\n",
@@ -164,7 +187,7 @@ public class AdviceService {
         List<MealEntry> entries = mealEntryRepository.findByUserIdAndEntryDateBetween(userId, startDate, endDate);
         
         if (entries.isEmpty()) {
-            return "\nMeal History (Last 7 Days): No meals logged.\n";
+            return "Meal History (Last 7 Days): No meals logged.";
         }
         
         DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("EEE, MMM d").withLocale(java.util.Locale.US);
@@ -173,7 +196,7 @@ public class AdviceService {
         Map<LocalDate, List<MealEntry>> entriesByDate = entries.stream()
                 .collect(Collectors.groupingBy(MealEntry::getEntryDate));
         
-        StringBuilder sb = new StringBuilder("\nMeal History (Last 7 Days):\n");
+        StringBuilder sb = new StringBuilder("Meal History (Last 7 Days):\n");
         
         entriesByDate.entrySet().stream()
                 .sorted((e1, e2) -> e2.getKey().compareTo(e1.getKey()))
@@ -198,61 +221,6 @@ public class AdviceService {
                 });
         
         return sb.toString();
-    }
-
-    private List<Map<String, Object>> buildContentsWithHistory(AdviceRequest request, User user) {
-        List<Map<String, Object>> contents = new ArrayList<>();
-        
-        String systemPrompt = buildSystemPrompt(user);
-        
-        contents.add(Map.of(
-                "role", "user",
-                "parts", List.of(Map.of("text", systemPrompt))
-        ));
-        contents.add(Map.of(
-                "role", "model",
-                "parts", List.of(Map.of("text", "I understand. I'm ready to help with diet and nutrition advice."))
-        ));
-
-        if (request.getHistory() != null && !request.getHistory().isEmpty()) {
-            List<AdviceRequest.ChatMessage> truncatedHistory = truncateHistoryToTokenLimit(request.getHistory());
-            
-            for (AdviceRequest.ChatMessage msg : truncatedHistory) {
-                String role = "user".equals(msg.getRole()) ? "user" : "model";
-                contents.add(Map.of(
-                        "role", role,
-                        "parts", List.of(Map.of("text", msg.getContent()))
-                ));
-            }
-        }
-
-        contents.add(Map.of(
-                "role", "user",
-                "parts", List.of(Map.of("text", request.getMessage()))
-        ));
-
-        return contents;
-    }
-
-    private List<AdviceRequest.ChatMessage> truncateHistoryToTokenLimit(List<AdviceRequest.ChatMessage> history) {
-        int maxChars = (int) (MAX_HISTORY_TOKENS * AVG_CHARS_PER_TOKEN);
-        int totalChars = 0;
-        
-        List<AdviceRequest.ChatMessage> result = new ArrayList<>();
-        
-        for (int i = history.size() - 1; i >= 0; i--) {
-            AdviceRequest.ChatMessage msg = history.get(i);
-            int msgChars = msg.getContent() != null ? msg.getContent().length() : 0;
-            
-            if (totalChars + msgChars > maxChars) {
-                break;
-            }
-            
-            totalChars += msgChars;
-            result.add(0, msg);
-        }
-        
-        return result;
     }
 
     @SuppressWarnings("unchecked")

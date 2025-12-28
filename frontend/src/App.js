@@ -11,6 +11,7 @@ import History from './components/history/History';
 import WeightTracking from './components/weight/WeightTracking';
 import Profile from './components/profile/Profile';
 import Advice from './components/advice/Advice';
+import Plan from './components/plan/Plan';
 import Layout from './components/layout/Layout';
 
 const theme = createTheme({
@@ -78,6 +79,7 @@ function App() {
               <Route path="history" element={<History />} />
               <Route path="weight" element={<WeightTracking />} />
               <Route path="advice" element={<Advice />} />
+              <Route path="plan" element={<Plan />} />
               <Route path="profile" element={<Profile />} />
             </Route>
             <Route path="*" element={<Navigate to="/dashboard" replace />} />

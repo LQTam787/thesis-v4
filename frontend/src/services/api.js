@@ -79,4 +79,14 @@ export const adviceService = {
   chat: (message, history) => api.post('/advice/chat', { message, history }),
 };
 
+export const planService = {
+  getPlan: () => api.get('/plan'),
+  generatePlan: () => api.post('/plan/generate'),
+};
+
+export const reviewService = {
+  getReview: () => api.get('/review'),
+  generateReview: () => api.post('/review/generate'),
+};
+
 export default api;

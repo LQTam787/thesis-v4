@@ -12,6 +12,21 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
+/**
+ * REST Controller for AI-powered diet advice chatbot.
+ * 
+ * <p>Provides an interactive chat interface where users can ask nutrition
+ * questions and receive personalized advice from Google Gemini AI.</p>
+ * 
+ * <h2>Endpoints:</h2>
+ * <ul>
+ *   <li><b>POST /api/advice/chat:</b> Send message and get AI response</li>
+ * </ul>
+ * 
+ * @author Calorie Tracker Team
+ * @version 1.0.0
+ * @see AdviceService
+ */
 @RestController
 @RequestMapping("/api/advice")
 @RequiredArgsConstructor

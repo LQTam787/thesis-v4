@@ -1,3 +1,14 @@
+/**
+ * @fileoverview Login Component - User authentication page
+ * 
+ * Provides a login form for existing users to authenticate.
+ * On successful login, redirects to the dashboard.
+ * 
+ * @module components/auth/Login
+ * @version 1.0.0
+ * @author Calorie Tracker Team
+ */
+
 import React, { useState } from 'react';
 import { Link as RouterLink, useNavigate } from 'react-router-dom';
 import {
@@ -12,6 +23,14 @@ import {
 } from '@mui/material';
 import { useAuth } from '../../context/AuthContext';
 
+/**
+ * Login Component
+ * 
+ * Renders a login form with email and password fields.
+ * Uses AuthContext for authentication and React Router for navigation.
+ * 
+ * @returns {React.ReactElement} Login form component
+ */
 const Login = () => {
   const navigate = useNavigate();
   const { login } = useAuth();

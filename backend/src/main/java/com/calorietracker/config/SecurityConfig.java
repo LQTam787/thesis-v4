@@ -17,6 +17,36 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+/**
+ * Spring Security configuration for the Calorie Tracker application.
+ * 
+ * <p>This configuration implements a stateless JWT-based authentication system,
+ * which is ideal for REST APIs consumed by single-page applications (SPAs).</p>
+ * 
+ * <h2>Security Features:</h2>
+ * <ul>
+ *   <li><b>JWT Authentication:</b> Stateless token-based auth via Bearer tokens</li>
+ *   <li><b>BCrypt Password Encoding:</b> Industry-standard password hashing</li>
+ *   <li><b>CORS Configuration:</b> Allows requests from React frontend (localhost:3000)</li>
+ *   <li><b>CSRF Disabled:</b> Not needed for stateless JWT authentication</li>
+ *   <li><b>Stateless Sessions:</b> No server-side session storage</li>
+ * </ul>
+ * 
+ * <h2>Public Endpoints:</h2>
+ * <ul>
+ *   <li>/api/auth/** - Registration and login endpoints</li>
+ *   <li>/api/test/** - Testing endpoints (development only)</li>
+ * </ul>
+ * 
+ * <h2>Design Pattern:</h2>
+ * <p>Implements the Filter Chain pattern where the JwtAuthenticationFilter
+ * intercepts requests before the standard UsernamePasswordAuthenticationFilter.</p>
+ * 
+ * @author Calorie Tracker Team
+ * @version 1.0.0
+ * @see JwtAuthenticationFilter
+ * @see com.calorietracker.service.JwtService
+ */
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor

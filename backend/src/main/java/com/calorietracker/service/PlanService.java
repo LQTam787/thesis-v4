@@ -20,6 +20,37 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+/**
+ * Service for AI-powered meal plan generation using Google Gemini API.
+ * 
+ * <p>This service integrates with Google's Gemini AI to generate personalized
+ * 7-day meal plans based on user profile, goals, and recent eating/weight history.</p>
+ * 
+ * <h2>AI Integration:</h2>
+ * <ul>
+ *   <li><b>API:</b> Google Gemini API (generativelanguage.googleapis.com)</li>
+ *   <li><b>Model:</b> Configurable via gemini.api.model property</li>
+ *   <li><b>Communication:</b> WebClient (non-blocking HTTP client)</li>
+ * </ul>
+ * 
+ * <h2>Prompt Engineering:</h2>
+ * <p>The service constructs detailed prompts including:</p>
+ * <ul>
+ *   <li>User profile (age, sex, height, weight, BMI, activity level)</li>
+ *   <li>Goals (target weight, weekly pace, daily calorie allowance)</li>
+ *   <li>Meal history (last 7 days with calories)</li>
+ *   <li>Weight history (last month with trend analysis)</li>
+ * </ul>
+ * 
+ * <h2>Design Pattern:</h2>
+ * <p>Implements the Strategy pattern for AI communication, allowing easy
+ * swapping of AI providers by changing the API endpoint and request format.</p>
+ * 
+ * @author Calorie Tracker Team
+ * @version 1.0.0
+ * @see Plan
+ * @see com.calorietracker.controller.PlanController
+ */
 @Service
 @Slf4j
 public class PlanService {

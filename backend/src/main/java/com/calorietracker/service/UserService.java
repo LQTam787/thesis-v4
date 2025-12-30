@@ -16,6 +16,33 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
+/**
+ * Service layer for user management operations.
+ * 
+ * <p>This service handles user registration, profile management, and weight updates.
+ * It automatically calculates derived values like BMI and daily calorie allowance
+ * whenever relevant user data changes.</p>
+ * 
+ * <h2>Key Operations:</h2>
+ * <ul>
+ *   <li><b>Registration:</b> Creates new user with encrypted password and calculated metrics</li>
+ *   <li><b>Profile Update:</b> Updates user info and recalculates BMI/calories</li>
+ *   <li><b>Weight Update:</b> Updates weight and recalculates dependent values</li>
+ * </ul>
+ * 
+ * <h2>Automatic Calculations:</h2>
+ * <p>When weight, height, or goals change, the service automatically recalculates:</p>
+ * <ul>
+ *   <li>BMI using standard formula</li>
+ *   <li>Daily calorie allowance using Mifflin-St Jeor equation</li>
+ *   <li>Goal type derived from current vs target weight comparison</li>
+ * </ul>
+ * 
+ * @author Calorie Tracker Team
+ * @version 1.0.0
+ * @see com.calorietracker.util.CalorieCalculator
+ * @see User
+ */
 @Service
 @RequiredArgsConstructor
 public class UserService {

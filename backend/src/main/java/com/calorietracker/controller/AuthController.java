@@ -17,6 +17,32 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.web.bind.annotation.*;
 
+/**
+ * REST Controller for authentication operations (login and registration).
+ * 
+ * <p>This controller handles public endpoints for user authentication.
+ * All endpoints under /api/auth/** are accessible without authentication
+ * as configured in {@link com.calorietracker.config.SecurityConfig}.</p>
+ * 
+ * <h2>Endpoints:</h2>
+ * <ul>
+ *   <li><b>POST /api/auth/register:</b> New user registration</li>
+ *   <li><b>POST /api/auth/login:</b> User authentication</li>
+ * </ul>
+ * 
+ * <h2>Authentication Flow:</h2>
+ * <ol>
+ *   <li>User submits credentials (email/password)</li>
+ *   <li>Credentials are validated against database</li>
+ *   <li>On success, JWT token is generated and returned</li>
+ *   <li>Client stores token and includes it in subsequent requests</li>
+ * </ol>
+ * 
+ * @author Calorie Tracker Team
+ * @version 1.0.0
+ * @see com.calorietracker.service.JwtService
+ * @see com.calorietracker.config.SecurityConfig
+ */
 @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor

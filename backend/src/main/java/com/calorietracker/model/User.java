@@ -7,6 +7,37 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
+/**
+ * JPA Entity representing a user in the Calorie Tracker system.
+ * 
+ * <p>This entity stores all user-related information including personal details,
+ * physical measurements, fitness goals, and calculated nutritional values.
+ * It serves as the central entity with relationships to meals, foods, weight entries,
+ * plans, and reviews.</p>
+ * 
+ * <h2>Key Attributes:</h2>
+ * <ul>
+ *   <li><b>Personal Info:</b> name, email, password (BCrypt encrypted), date of birth, sex</li>
+ *   <li><b>Physical Measurements:</b> weight (kg), height (cm), BMI (auto-calculated)</li>
+ *   <li><b>Fitness Goals:</b> goal weight, goal type (LOSE/MAINTAIN/GAIN), weekly goal pace</li>
+ *   <li><b>Calculated Values:</b> BMI, allowed daily calorie intake (using Mifflin-St Jeor equation)</li>
+ * </ul>
+ * 
+ * <h2>Relationships:</h2>
+ * <ul>
+ *   <li>One-to-Many with {@link Food} (custom foods created by user)</li>
+ *   <li>One-to-Many with {@link MealEntry} (logged meals)</li>
+ *   <li>One-to-Many with {@link WeightEntry} (weight tracking history)</li>
+ *   <li>One-to-One with {@link Plan} (AI-generated meal plan)</li>
+ *   <li>One-to-One with {@link Review} (AI-generated progress review)</li>
+ * </ul>
+ * 
+ * @author Calorie Tracker Team
+ * @version 1.0.0
+ * @see ActivityLevel
+ * @see GoalType
+ * @see Sex
+ */
 @Entity
 @Table(name = "users")
 @Data
@@ -87,11 +118,23 @@ public class User {
         updatedAt = LocalDateTime.now();
     }
 
+    /**
+     * JPA lifecycle callback executed before entity update.
+     * Automatically updates the updatedAt timestamp.
+     */
     @PreUpdate
     protected void onUpdate() {
         updatedAt = LocalDateTime.now();
     }
 
+    /**
+     * Calculates the user's current age based on date of birth.
+     * 
+     * <p>Note: This is a simplified calculation using only the year difference.
+     * For more precise age calculation, consider using Period.between().</p>
+     * 
+     * @return the user's age in years
+     */
     public int getAge() {
         return LocalDate.now().getYear() - dob.getYear();
     }

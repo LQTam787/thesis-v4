@@ -17,6 +17,27 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDate;
 import java.util.List;
 
+/**
+ * REST Controller for weight tracking operations.
+ * 
+ * <p>Manages weight entries for progress tracking. Implements upsert pattern
+ * where one entry per day is allowed - posting to existing date updates the entry.</p>
+ * 
+ * <h2>Endpoints:</h2>
+ * <ul>
+ *   <li><b>POST /api/weight-entries:</b> Log or update weight for a date</li>
+ *   <li><b>GET /api/weight-entries:</b> Get all weight entries (for charts)</li>
+ *   <li><b>GET /api/weight-entries/latest:</b> Get most recent weight entry</li>
+ *   <li><b>GET /api/weight-entries/date/{date}:</b> Get weight for specific date</li>
+ *   <li><b>GET /api/weight-entries/range:</b> Get weights for date range</li>
+ *   <li><b>GET /api/weight-entries/{id}:</b> Get single weight entry</li>
+ *   <li><b>DELETE /api/weight-entries/{id}:</b> Delete weight entry</li>
+ * </ul>
+ * 
+ * @author Calorie Tracker Team
+ * @version 1.0.0
+ * @see WeightEntryService
+ */
 @RestController
 @RequestMapping("/api/weight-entries")
 @RequiredArgsConstructor

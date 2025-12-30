@@ -1,3 +1,20 @@
+/**
+ * @fileoverview Main Application Component for Calorie Tracker
+ * 
+ * This is the root component that sets up:
+ * - Material-UI theming with custom color palette
+ * - React Router for client-side navigation
+ * - Authentication context provider for global auth state
+ * - Route protection (PrivateRoute/PublicRoute components)
+ * 
+ * @description A full-stack calorie tracking application built with React 18,
+ * Material-UI, and React Router. Features include daily calorie tracking,
+ * meal logging, weight monitoring, and AI-powered nutritional advice.
+ * 
+ * @version 1.0.0
+ * @author Calorie Tracker Team
+ */
+
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
@@ -14,16 +31,20 @@ import Advice from './components/advice/Advice';
 import Plan from './components/plan/Plan';
 import Layout from './components/layout/Layout';
 
+/**
+ * Material-UI theme configuration
+ * Defines the application's color scheme, typography, and component defaults
+ */
 const theme = createTheme({
   palette: {
     primary: {
-      main: '#1976d2',
+      main: '#1976d2', // Blue - primary brand color
     },
     secondary: {
-      main: '#dc004e',
+      main: '#dc004e', // Pink/Red - accent color
     },
     background: {
-      default: '#f5f5f5',
+      default: '#f5f5f5', // Light gray background
     },
   },
   typography: {
@@ -31,6 +52,16 @@ const theme = createTheme({
   },
 });
 
+/**
+ * PrivateRoute - Route guard component for authenticated routes
+ * 
+ * Protects routes that require authentication. If user is not authenticated,
+ * redirects to login page. Shows loading state while auth status is being determined.
+ * 
+ * @param {Object} props - Component props
+ * @param {React.ReactNode} props.children - Child components to render if authenticated
+ * @returns {React.ReactNode} Protected route content or redirect
+ */
 const PrivateRoute = ({ children }) => {
   const { isAuthenticated, loading } = useAuth();
   
@@ -41,6 +72,16 @@ const PrivateRoute = ({ children }) => {
   return isAuthenticated ? children : <Navigate to="/login" />;
 };
 
+/**
+ * PublicRoute - Route guard component for public-only routes
+ * 
+ * Protects routes that should only be accessible to non-authenticated users
+ * (login, register). Redirects authenticated users to dashboard.
+ * 
+ * @param {Object} props - Component props
+ * @param {React.ReactNode} props.children - Child components to render if not authenticated
+ * @returns {React.ReactNode} Public route content or redirect
+ */
 const PublicRoute = ({ children }) => {
   const { isAuthenticated, loading } = useAuth();
   
@@ -51,6 +92,17 @@ const PublicRoute = ({ children }) => {
   return !isAuthenticated ? children : <Navigate to="/dashboard" />;
 };
 
+/**
+ * App - Root application component
+ * 
+ * Sets up the application structure with:
+ * - ThemeProvider for Material-UI styling
+ * - AuthProvider for authentication state management
+ * - Router for client-side navigation
+ * - Route definitions with appropriate guards
+ * 
+ * @returns {React.ReactElement} The complete application
+ */
 function App() {
   return (
     <ThemeProvider theme={theme}>

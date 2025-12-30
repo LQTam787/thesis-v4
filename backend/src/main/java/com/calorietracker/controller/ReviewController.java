@@ -12,6 +12,23 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
 
+/**
+ * REST Controller for AI-powered progress review generation.
+ * 
+ * <p>Provides endpoints for generating and managing progress reviews that analyze
+ * user's meal plan adherence, calorie patterns, and weight progress.</p>
+ * 
+ * <h2>Endpoints:</h2>
+ * <ul>
+ *   <li><b>GET /api/review:</b> Get current review (if exists)</li>
+ *   <li><b>POST /api/review/generate:</b> Generate new AI progress review</li>
+ *   <li><b>DELETE /api/review:</b> Delete current review</li>
+ * </ul>
+ * 
+ * @author Calorie Tracker Team
+ * @version 1.0.0
+ * @see ReviewService
+ */
 @RestController
 @RequestMapping("/api/review")
 @RequiredArgsConstructor

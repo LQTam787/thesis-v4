@@ -19,6 +19,28 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+/**
+ * Service layer for dashboard data aggregation and presentation.
+ * 
+ * <p>This service aggregates data from multiple sources (meals, weight entries, user profile)
+ * to provide a comprehensive daily overview for the user's dashboard view.</p>
+ * 
+ * <h2>Dashboard Data Includes:</h2>
+ * <ul>
+ *   <li><b>Calorie Summary:</b> Allowed, consumed, and remaining calories for the day</li>
+ *   <li><b>Meals by Type:</b> Grouped meal entries (breakfast, lunch, dinner, snacks)</li>
+ *   <li><b>Weight Info:</b> Current weight, goal weight, and today's weight entry if logged</li>
+ *   <li><b>User Context:</b> Name, goal type for personalized display</li>
+ * </ul>
+ * 
+ * <h2>Design Pattern:</h2>
+ * <p>Implements the Aggregator pattern, combining data from multiple repositories
+ * into a single cohesive response object for the frontend.</p>
+ * 
+ * @author Calorie Tracker Team
+ * @version 1.0.0
+ * @see DashboardResponse
+ */
 @Service
 @RequiredArgsConstructor
 public class DashboardService {

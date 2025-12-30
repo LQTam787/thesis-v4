@@ -16,6 +16,27 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+/**
+ * REST Controller for food management operations.
+ * 
+ * <p>Handles CRUD operations for food items, including both system-wide foods
+ * and user-created custom foods. Users can only modify their own custom foods.</p>
+ * 
+ * <h2>Endpoints:</h2>
+ * <ul>
+ *   <li><b>GET /api/foods:</b> Get all available foods (system + custom)</li>
+ *   <li><b>GET /api/foods/meal-type/{type}:</b> Get foods filtered by meal type</li>
+ *   <li><b>GET /api/foods/custom:</b> Get user's custom foods only</li>
+ *   <li><b>GET /api/foods/{id}:</b> Get single food by ID</li>
+ *   <li><b>POST /api/foods:</b> Create new custom food</li>
+ *   <li><b>PUT /api/foods/{id}:</b> Update custom food</li>
+ *   <li><b>DELETE /api/foods/{id}:</b> Delete custom food</li>
+ * </ul>
+ * 
+ * @author Calorie Tracker Team
+ * @version 1.0.0
+ * @see FoodService
+ */
 @RestController
 @RequestMapping("/api/foods")
 @RequiredArgsConstructor

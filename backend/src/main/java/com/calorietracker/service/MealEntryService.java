@@ -18,6 +18,29 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * Service layer for meal entry (food consumption log) operations.
+ * 
+ * <p>This service handles the core calorie tracking functionality, allowing users
+ * to log meals, view their consumption history, and calculate daily calorie totals.</p>
+ * 
+ * <h2>Key Operations:</h2>
+ * <ul>
+ *   <li><b>Log Meal:</b> Record food consumption with date and time</li>
+ *   <li><b>View by Date:</b> Retrieve meals for a specific day or date range</li>
+ *   <li><b>Calculate Totals:</b> Sum calories consumed for a given period</li>
+ *   <li><b>Delete Entry:</b> Remove incorrectly logged meals</li>
+ * </ul>
+ * 
+ * <h2>Access Control:</h2>
+ * <p>Users can only access and modify their own meal entries. The service validates
+ * that users have access to the food items they're logging (system or own custom foods).</p>
+ * 
+ * @author Calorie Tracker Team
+ * @version 1.0.0
+ * @see MealEntry
+ * @see MealEntryRepository
+ */
 @Service
 @RequiredArgsConstructor
 public class MealEntryService {

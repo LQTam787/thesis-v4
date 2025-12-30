@@ -17,6 +17,31 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+/**
+ * Service layer for weight tracking operations.
+ * 
+ * <p>This service manages weight entries for users, enabling progress tracking
+ * toward their weight goals. It implements an upsert pattern where logging weight
+ * for an existing date updates the entry rather than creating a duplicate.</p>
+ * 
+ * <h2>Key Features:</h2>
+ * <ul>
+ *   <li><b>Upsert Pattern:</b> One entry per user per day, updates replace existing</li>
+ *   <li><b>Auto-sync:</b> Latest weight entry automatically updates user's current weight</li>
+ *   <li><b>Cascade Updates:</b> Weight changes trigger BMI and calorie recalculation</li>
+ *   <li><b>Historical Data:</b> Full history for progress charts and AI analysis</li>
+ * </ul>
+ * 
+ * <h2>Business Logic:</h2>
+ * <p>When a weight entry is created/updated and it's the chronologically latest entry,
+ * the user's profile is automatically updated with the new weight, triggering
+ * recalculation of BMI and daily calorie allowance.</p>
+ * 
+ * @author Calorie Tracker Team
+ * @version 1.0.0
+ * @see WeightEntry
+ * @see UserService#updateUserWeight
+ */
 @Service
 @RequiredArgsConstructor
 public class WeightEntryService {

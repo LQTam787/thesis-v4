@@ -17,6 +17,33 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 
+/**
+ * JWT Authentication Filter that intercepts every HTTP request to validate JWT tokens.
+ * 
+ * <p>This filter extends {@link OncePerRequestFilter} to ensure it executes exactly once
+ * per request. It extracts the JWT token from the Authorization header, validates it,
+ * and sets up the Spring Security context if valid.</p>
+ * 
+ * <h2>Authentication Flow:</h2>
+ * <ol>
+ *   <li>Extract Authorization header from request</li>
+ *   <li>Check if header starts with "Bearer "</li>
+ *   <li>Extract JWT token (substring after "Bearer ")</li>
+ *   <li>Extract username (email) from token</li>
+ *   <li>Load user details from database</li>
+ *   <li>Validate token against user details</li>
+ *   <li>Set authentication in SecurityContext if valid</li>
+ * </ol>
+ * 
+ * <h2>Design Pattern:</h2>
+ * <p>Implements the Intercepting Filter pattern, part of the security filter chain
+ * that processes requests before they reach the controllers.</p>
+ * 
+ * @author Calorie Tracker Team
+ * @version 1.0.0
+ * @see com.calorietracker.service.JwtService
+ * @see OncePerRequestFilter
+ */
 @Component
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {

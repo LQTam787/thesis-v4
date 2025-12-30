@@ -11,6 +11,22 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
+/**
+ * REST Controller for user profile management.
+ * 
+ * <p>Handles user profile retrieval and updates. Profile changes trigger
+ * automatic recalculation of BMI and daily calorie allowance.</p>
+ * 
+ * <h2>Endpoints:</h2>
+ * <ul>
+ *   <li><b>GET /api/users/profile:</b> Get current user's profile</li>
+ *   <li><b>PUT /api/users/profile:</b> Update user profile</li>
+ * </ul>
+ * 
+ * @author Calorie Tracker Team
+ * @version 1.0.0
+ * @see UserService
+ */
 @RestController
 @RequestMapping("/api/users")
 @RequiredArgsConstructor

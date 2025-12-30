@@ -21,6 +21,37 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+/**
+ * Service for AI-powered diet advice chatbot using Google Gemini API.
+ * 
+ * <p>This service provides an interactive chat interface where users can ask
+ * questions about nutrition, diet, and receive personalized advice based on
+ * their profile and eating history.</p>
+ * 
+ * <h2>Features:</h2>
+ * <ul>
+ *   <li><b>Contextual Advice:</b> AI considers user's profile, goals, and history</li>
+ *   <li><b>Conversation History:</b> Maintains chat context for follow-up questions</li>
+ *   <li><b>Token Management:</b> Truncates history to stay within API limits</li>
+ * </ul>
+ * 
+ * <h2>Prompt Context Includes:</h2>
+ * <ul>
+ *   <li>User profile (physical stats, goals, calorie allowance)</li>
+ *   <li>Recent meal history (last 7 days)</li>
+ *   <li>Weight progress (last month)</li>
+ *   <li>Previous conversation messages</li>
+ * </ul>
+ * 
+ * <h2>Token Optimization:</h2>
+ * <p>The service implements a sliding window approach for conversation history,
+ * keeping approximately 2000 tokens (~8000 characters) of recent messages
+ * to balance context retention with API limits.</p>
+ * 
+ * @author Calorie Tracker Team
+ * @version 1.0.0
+ * @see com.calorietracker.controller.AdviceController
+ */
 @Service
 @Slf4j
 public class AdviceService {

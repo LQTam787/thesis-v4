@@ -1,3 +1,19 @@
+/**
+ * @fileoverview Weight Tracking Component - Weight progress monitoring
+ * 
+ * This component provides comprehensive weight tracking functionality:
+ * - Visual weight progress chart using Chart.js
+ * - Statistics cards (current, change, min, max)
+ * - Weight history table
+ * - Add new weight entry dialog
+ * 
+ * Uses Chart.js with Luxon adapter for time-series visualization.
+ * 
+ * @module components/weight/WeightTracking
+ * @version 1.0.0
+ * @author Calorie Tracker Team
+ */
+
 import React, { useState, useEffect, useCallback } from 'react';
 import {
   Box,
@@ -37,6 +53,7 @@ import 'chartjs-adapter-luxon';
 import { Line } from 'react-chartjs-2';
 import { weightEntryService } from '../../services/api';
 
+// Register Chart.js components for line chart with time scale
 ChartJS.register(
   TimeScale,
   LinearScale,
@@ -47,6 +64,14 @@ ChartJS.register(
   Legend
 );
 
+/**
+ * WeightTracking Component
+ * 
+ * Displays weight tracking interface with chart visualization,
+ * statistics, and history table. Allows users to log new weight entries.
+ * 
+ * @returns {React.ReactElement} Weight tracking component
+ */
 const WeightTracking = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');

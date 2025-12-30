@@ -16,6 +16,31 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * Service layer for food management operations.
+ * 
+ * <p>This service manages both system-wide foods (available to all users) and
+ * custom foods created by individual users. It enforces access control to ensure
+ * users can only modify their own custom foods.</p>
+ * 
+ * <h2>Food Types:</h2>
+ * <ul>
+ *   <li><b>System Foods:</b> Pre-defined foods with user=null, available to everyone</li>
+ *   <li><b>Custom Foods:</b> User-created foods linked to their creator</li>
+ * </ul>
+ * 
+ * <h2>Access Control:</h2>
+ * <ul>
+ *   <li>All users can view system foods and their own custom foods</li>
+ *   <li>Only the creator can update or delete custom foods</li>
+ *   <li>System foods cannot be modified or deleted by users</li>
+ * </ul>
+ * 
+ * @author Calorie Tracker Team
+ * @version 1.0.0
+ * @see Food
+ * @see FoodRepository
+ */
 @Service
 @RequiredArgsConstructor
 public class FoodService {

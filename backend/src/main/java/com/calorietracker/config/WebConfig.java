@@ -11,6 +11,31 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import java.util.Arrays;
 import java.util.List;
 
+/**
+ * Web MVC configuration for Cross-Origin Resource Sharing (CORS).
+ * 
+ * <p>This configuration enables the React frontend (running on localhost:3000)
+ * to communicate with the Spring Boot backend (running on localhost:8080).
+ * Without CORS configuration, browsers would block cross-origin requests
+ * due to the Same-Origin Policy.</p>
+ * 
+ * <h2>CORS Settings:</h2>
+ * <ul>
+ *   <li><b>Allowed Origins:</b> http://localhost:3000 (React dev server)</li>
+ *   <li><b>Allowed Methods:</b> GET, POST, PUT, DELETE, OPTIONS</li>
+ *   <li><b>Allowed Headers:</b> All headers (*)</li>
+ *   <li><b>Credentials:</b> Enabled (for cookies/auth headers)</li>
+ *   <li><b>Max Age:</b> 3600 seconds (1 hour) for preflight cache</li>
+ * </ul>
+ * 
+ * <h2>Note:</h2>
+ * <p>For production deployment, the allowed origins should be updated to
+ * include the actual production domain instead of localhost.</p>
+ * 
+ * @author Calorie Tracker Team
+ * @version 1.0.0
+ * @see WebMvcConfigurer
+ */
 @Configuration
 public class WebConfig implements WebMvcConfigurer {
 

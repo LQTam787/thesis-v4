@@ -1,3 +1,17 @@
+/**
+ * @fileoverview Dashboard Component - Main user interface for daily calorie tracking
+ * 
+ * This component displays the user's daily calorie summary including:
+ * - Daily calorie allowance, consumed, and remaining
+ * - Visual progress bar showing consumption percentage
+ * - List of meals logged today grouped by meal type
+ * - Quick access to log new meals
+ * 
+ * @module components/dashboard/Dashboard
+ * @version 1.0.0
+ * @author Calorie Tracker Team
+ */
+
 import React, { useState, useEffect, useCallback } from 'react';
 import {
   Box,
@@ -15,6 +29,14 @@ import { useAuth } from '../../context/AuthContext';
 import { dashboardService } from '../../services/api';
 import LogMealModal from './LogMealModal';
 
+/**
+ * Dashboard Component
+ * 
+ * Main dashboard view showing daily calorie tracking summary.
+ * Fetches data from the backend on mount and after meal logging.
+ * 
+ * @returns {React.ReactElement} Dashboard component
+ */
 const Dashboard = () => {
   const { user } = useAuth();
   const [loading, setLoading] = useState(true);

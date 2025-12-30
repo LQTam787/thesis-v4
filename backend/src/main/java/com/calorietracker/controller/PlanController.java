@@ -10,6 +10,22 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
+/**
+ * REST Controller for AI-powered meal plan generation.
+ * 
+ * <p>Provides endpoints for generating and retrieving personalized 7-day meal plans
+ * using Google Gemini AI based on user profile and eating history.</p>
+ * 
+ * <h2>Endpoints:</h2>
+ * <ul>
+ *   <li><b>GET /api/plan:</b> Get current meal plan (if exists)</li>
+ *   <li><b>POST /api/plan/generate:</b> Generate new AI meal plan</li>
+ * </ul>
+ * 
+ * @author Calorie Tracker Team
+ * @version 1.0.0
+ * @see PlanService
+ */
 @RestController
 @RequestMapping("/api/plan")
 @RequiredArgsConstructor

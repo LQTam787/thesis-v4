@@ -22,6 +22,37 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+/**
+ * Service for AI-powered progress review generation using Google Gemini API.
+ * 
+ * <p>This service analyzes user's meal plan adherence, calorie intake patterns,
+ * and weight progress to generate comprehensive reviews with actionable recommendations.</p>
+ * 
+ * <h2>Review Analysis Includes:</h2>
+ * <ul>
+ *   <li><b>Plan Adherence:</b> How well user followed their meal plan</li>
+ *   <li><b>Calorie Patterns:</b> Daily intake vs allowance analysis</li>
+ *   <li><b>Weight Progress:</b> Trend analysis toward goal weight</li>
+ *   <li><b>Recommendations:</b> Specific, actionable improvement suggestions</li>
+ * </ul>
+ * 
+ * <h2>Data Sources:</h2>
+ * <ul>
+ *   <li>User profile and goals</li>
+ *   <li>Current meal plan (if generated)</li>
+ *   <li>Meal history (last 7 days)</li>
+ *   <li>Weight history (last month)</li>
+ * </ul>
+ * 
+ * <h2>Storage:</h2>
+ * <p>Each user has one review at a time. Generating a new review replaces
+ * the existing one. Reviews can be deleted to allow fresh generation.</p>
+ * 
+ * @author Calorie Tracker Team
+ * @version 1.0.0
+ * @see Review
+ * @see com.calorietracker.controller.ReviewController
+ */
 @Service
 @Slf4j
 public class ReviewService {

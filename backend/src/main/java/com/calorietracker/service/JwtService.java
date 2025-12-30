@@ -15,6 +15,33 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 
+/**
+ * Service for JWT (JSON Web Token) generation, parsing, and validation.
+ * 
+ * <p>This service handles all JWT-related operations for the authentication system,
+ * using the JJWT library with HS256 (HMAC-SHA256) signing algorithm.</p>
+ * 
+ * <h2>JWT Structure:</h2>
+ * <ul>
+ *   <li><b>Header:</b> Algorithm (HS256) and token type (JWT)</li>
+ *   <li><b>Payload:</b> Subject (user email), issued at, expiration, custom claims</li>
+ *   <li><b>Signature:</b> HMAC-SHA256 signature using secret key</li>
+ * </ul>
+ * 
+ * <h2>Configuration:</h2>
+ * <ul>
+ *   <li><b>jwt.secret:</b> Base64-encoded secret key (min 256 bits for HS256)</li>
+ *   <li><b>jwt.expiration:</b> Token validity duration in milliseconds (default: 24 hours)</li>
+ * </ul>
+ * 
+ * <h2>Security Considerations:</h2>
+ * <p>The secret key should be kept secure and rotated periodically in production.
+ * Tokens are stateless - revocation requires additional infrastructure like a blacklist.</p>
+ * 
+ * @author Calorie Tracker Team
+ * @version 1.0.0
+ * @see com.calorietracker.config.JwtAuthenticationFilter
+ */
 @Service
 public class JwtService {
 

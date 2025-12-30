@@ -17,6 +17,28 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDate;
 import java.util.List;
 
+/**
+ * REST Controller for meal entry (food consumption log) operations.
+ * 
+ * <p>Handles the core calorie tracking functionality - logging meals,
+ * viewing consumption history, and calculating calorie totals.</p>
+ * 
+ * <h2>Endpoints:</h2>
+ * <ul>
+ *   <li><b>POST /api/meal-entries:</b> Log a new meal</li>
+ *   <li><b>GET /api/meal-entries/today:</b> Get today's meals</li>
+ *   <li><b>GET /api/meal-entries/date/{date}:</b> Get meals for specific date</li>
+ *   <li><b>GET /api/meal-entries/range:</b> Get meals for date range</li>
+ *   <li><b>GET /api/meal-entries/{id}:</b> Get single meal entry</li>
+ *   <li><b>DELETE /api/meal-entries/{id}:</b> Delete meal entry</li>
+ *   <li><b>GET /api/meal-entries/today/calories:</b> Get today's calorie total</li>
+ *   <li><b>GET /api/meal-entries/date/{date}/calories:</b> Get calorie total for date</li>
+ * </ul>
+ * 
+ * @author Calorie Tracker Team
+ * @version 1.0.0
+ * @see MealEntryService
+ */
 @RestController
 @RequestMapping("/api/meal-entries")
 @RequiredArgsConstructor

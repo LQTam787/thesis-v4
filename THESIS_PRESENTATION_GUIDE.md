@@ -158,10 +158,10 @@ MAINTAIN: Allowance = TDEE
 ### 5.1 User Registration Flow
 
 ```
-┌──────────┐    ┌──────────┐    ┌──────────┐    ┌──────────┐
+┌──────────┐     ┌──────────┐    ┌──────────┐     ┌──────────┐
 │  User    │───▶│ Frontend │───▶│ Backend  │───▶│ Database │
-│  Input   │    │ Validate │    │ Process  │    │  Store   │
-└──────────┘    └──────────┘    └──────────┘    └──────────┘
+│  Input   │     │ Validate │    │ Process  │     │  Store   │
+└──────────┘     └──────────┘    └──────────┘     └──────────┘
                                       │
                                       ▼
                               ┌──────────────┐
@@ -207,10 +207,10 @@ User selects food → Creates MealEntry → Updates Dashboard
 ### 5.4 AI Integration Flow
 
 ```
-┌────────────┐     ┌────────────┐     ┌────────────┐
+┌────────────┐      ┌────────────┐     ┌────────────┐
 │   User     │────▶│  Backend   │────▶│  Gemini    │
-│  Request   │     │  Service   │     │    API     │
-└────────────┘     └────────────┘     └────────────┘
+│  Request   │      │  Service   │     │    API     │
+└────────────┘      └────────────┘     └────────────┘
                          │                   │
                          │ Build Prompt:     │
                          │ - User profile    │
@@ -283,28 +283,28 @@ User selects food → Creates MealEntry → Updates Dashboard
 ### 7.1 Entity Relationship Diagram
 
 ```
-┌─────────────┐       ┌─────────────┐       ┌─────────────┐
-│    users    │       │    foods    │       │meal_entries │
-├─────────────┤       ├─────────────┤       ├─────────────┤
+┌─────────────┐        ┌─────────────┐       ┌─────────────┐
+│    users    │        │    foods    │       │meal_entries │
+├─────────────┤        ├─────────────┤       ├─────────────┤
 │ id (PK)     │◀──┐   │ id (PK)     │◀──┐   │ id (PK)     │
-│ name        │   │   │ name        │   │   │ user_id(FK) │──┐
-│ email       │   │   │ calories    │   │   │ food_id(FK) │──┤
-│ password    │   │   │ meal_type   │   │   │ entry_date  │  │
-│ dob         │   │   │ user_id(FK) │───┘   │ entry_time  │  │
-│ sex         │   │   └─────────────┘       └─────────────┘  │
-│ weight      │   │                                          │
-│ height      │   └──────────────────────────────────────────┘
+│ name        │    │   │ name        │   │   │ user_id(FK) │──┐
+│ email       │    │   │ calories    │   │   │ food_id(FK) │──┤
+│ password    │    │   │ meal_type   │   │   │ entry_date  │  │
+│ dob         │    │   │ user_id(FK) │───┘   │ entry_time  │  │
+│ sex         │    │   └─────────────┘       └─────────────┘  │
+│ weight      │    │                                          │
+│ height      │    └──────────────────────────────────────────┘
 │ bmi         │
-│ goal        │       ┌─────────────┐       ┌─────────────┐
-│ goal_type   │       │weight_entries│      │   plans     │
-│ weekly_goal │       ├─────────────┤       ├─────────────┤
-│ daily_intake│       │ id (PK)     │       │ id (PK)     │
-└─────────────┘       │ user_id(FK) │───┐   │ user_id(FK) │───┐
-       │              │ entry_date  │   │   │ text        │   │
-       │              │ weight      │   │   └─────────────┘   │
-       │              └─────────────┘   │                     │
-       │                                │   ┌─────────────┐   │
-       └────────────────────────────────┴───│  reviews    │───┘
+│ goal        │       ┌──────────────┐       ┌─────────────┐
+│ goal_type   │       │weight_entries│       │   plans     │
+│ weekly_goal │       ├──────────────┤       ├─────────────┤
+│ daily_intake│       │ id (PK)      │       │ id (PK)     │
+└─────────────┘       │ user_id(FK)  │──┐    │ user_id(FK) │───┐
+       │              │ entry_date   │  │    │ text        │   │
+       │              │ weight       │  │    └─────────────┘   │
+       │              └──────────────┘  │                      │
+       │                                │   ┌─────────────┐    │
+       └────────────────────────────────┴───│  reviews    │────┘
                                             ├─────────────┤
                                             │ id (PK)     │
                                             │ user_id(FK) │
